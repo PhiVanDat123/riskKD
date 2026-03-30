@@ -188,6 +188,14 @@ class CustomDPOConfig(TrainingArguments):
     adpa_importance_sampling: Optional[bool] = field(default=False)
     kl_penalty_weight: Optional[float] = field(default=0)
 
+    # Ra-DPO hyperparameters
+    radpo_weight: Optional[float] = field(default=0, metadata={"help": "Weight for Ra-DPO loss component."})
+    radpo_alpha: Optional[float] = field(default=0.5, metadata={"help": "Alpha for Ra-DPO2 detach scaling."})
+    radpo_confidence_level: Optional[float] = field(default=0.5, metadata={"help": "CVaR confidence level for Ra-DPO."})
+    if_radpo2: Optional[bool] = field(default=False, metadata={"help": "Use Ra-DPO2 (detached chosen risk) if True, else Ra-DPO1."})
+    is_split_risk_ratio: Optional[bool] = field(default=True, metadata={"help": "Split vocab into two halves for CVaR if True."})
+    is_cal_risk_distribution_logps: Optional[bool] = field(default=False, metadata={"help": "Use risk distribution logps variant for CVaR if True."})
+
     # Copy From DPOConfig
     learning_rate: float = 1e-6
     beta: float = 0.1
@@ -436,6 +444,158 @@ class DistillDataCollator(DataCollatorMixin):
             output["rejected_margin_logp_every"] = [example["rejected_margin_logp_every"] for example in examples]
 
         return output
+
+
+# ─── Ra-DPO helper functions ─────────────────────────────────────────────────
+
+def _calculate_cvar_radpo(reference_distribution, distribution, probabilities, confidence_level, is_split_risk_ratio=True):
+    """Calculate CVaR (Conditional Value at Risk) for Ra-DPO."""
+    distribution = reference_distribution - distribution
+
+    if is_split_risk_ratio:
+        mid_index = distribution.size(2) // 2
+        chosen_distribution = distribution[:, :, :mid_index]
+        rejected_distribution = distribution[:, :, mid_index:]
+        chosen_probabilities = probabilities[:, :, :mid_index]
+        rejected_probabilities = probabilities[:, :, mid_index:]
+
+        chosen_VaR = torch.quantile(chosen_distribution, 1 - confidence_level, dim=2).unsqueeze(-1)
+        rejected_VaR = torch.quantile(rejected_distribution, 1 - confidence_level, dim=2).unsqueeze(-1)
+
+        chosen_mask = chosen_distribution > chosen_VaR
+        rejected_mask = rejected_distribution > rejected_VaR
+
+        chosen_weighted = chosen_probabilities * chosen_distribution * chosen_mask.float()
+        rejected_weighted = rejected_probabilities * rejected_distribution * rejected_mask.float()
+        CVaR = torch.cat((chosen_weighted, rejected_weighted), dim=2)
+    else:
+        VaR = torch.quantile(distribution, 1 - confidence_level, dim=2).unsqueeze(-1)
+        mask = distribution > VaR
+        CVaR = probabilities * distribution * mask.float()
+
+    return CVaR
+
+
+def _cal_risk_distribution_logps_radpo(reference_distribution_logps, distribution_logps, probabilities, confidence_level, is_split_risk_ratio=True):
+    """Calculate risk distribution log probabilities for Ra-DPO."""
+    if is_split_risk_ratio:
+        mid_index = distribution_logps.size(2) // 2
+
+        chosen_ref_logps = reference_distribution_logps[:, :, :mid_index]
+        rejected_ref_logps = reference_distribution_logps[:, :, mid_index:]
+        chosen_logps = distribution_logps[:, :, :mid_index]
+        rejected_logps = distribution_logps[:, :, mid_index:]
+
+        chosen_ref_q = torch.quantile(chosen_ref_logps, 1 - confidence_level, dim=2).unsqueeze(-1)
+        chosen_pol_q = torch.quantile(chosen_logps, 1 - confidence_level, dim=2).unsqueeze(-1)
+        rejected_ref_q = torch.quantile(rejected_ref_logps, 1 - confidence_level, dim=2).unsqueeze(-1)
+        rejected_pol_q = torch.quantile(rejected_logps, 1 - confidence_level, dim=2).unsqueeze(-1)
+
+        chosen_ref_VaR = chosen_ref_q * (chosen_ref_logps > chosen_ref_q).float()
+        chosen_pol_VaR = chosen_pol_q * (chosen_logps > chosen_pol_q).float()
+        rejected_ref_VaR = rejected_ref_q * (rejected_ref_logps > rejected_ref_q).float()
+        rejected_pol_VaR = rejected_pol_q * (rejected_logps > rejected_pol_q).float()
+
+        chosen_dist = chosen_ref_VaR - chosen_pol_VaR
+        rejected_dist = rejected_ref_VaR - rejected_pol_VaR
+
+        chosen_probs = probabilities[:, :, :mid_index]
+        rejected_probs = probabilities[:, :, mid_index:]
+
+        CVaR = torch.cat((chosen_probs * chosen_dist, rejected_probs * rejected_dist), dim=2)
+    else:
+        ref_q = torch.quantile(reference_distribution_logps, 1 - confidence_level, dim=2).unsqueeze(-1)
+        pol_q = torch.quantile(distribution_logps, 1 - confidence_level, dim=2).unsqueeze(-1)
+
+        ref_VaR = ref_q * (reference_distribution_logps > ref_q).float()
+        pol_VaR = pol_q * (distribution_logps > pol_q).float()
+
+        CVaR = probabilities * (ref_VaR - pol_VaR)
+
+    return CVaR
+
+
+def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.FloatTensor,
+                           labels: torch.LongTensor, weights: torch.FloatTensor = None,
+                           confidence_level: float = 0.5, is_split_risk_ratio: bool = True,
+                           is_cal_risk_distribution_logps: bool = False,
+                           average_log_prob: bool = False):
+    """Compute logps margin, KL divergence, and CVaR risk ratio for Ra-DPO."""
+    assert logits.shape[:-1] == labels.shape
+    assert reference_logits.shape[:-1] == labels.shape
+
+    labels = labels[:, 1:].clone()
+    logits = logits[:, :-1, :]
+    reference_logits = reference_logits[:, :-1, :]
+
+    loss_mask = (labels != -100)
+    labels[labels == -100] = 0
+
+    distribution_logps = logits.float().log_softmax(-1)
+    reference_distribution_ps = reference_logits.float().softmax(-1)
+    reference_distribution_logps = reference_distribution_ps.log()
+
+    per_position_kl = (reference_distribution_ps * (reference_distribution_logps - distribution_logps)).sum(-1)
+
+    if not is_cal_risk_distribution_logps:
+        per_position_risk_ratio = _calculate_cvar_radpo(
+            reference_distribution_logps, distribution_logps,
+            reference_distribution_ps, confidence_level, is_split_risk_ratio
+        ).sum(-1)
+    else:
+        per_position_risk_ratio = _cal_risk_distribution_logps_radpo(
+            reference_distribution_logps, distribution_logps,
+            reference_distribution_ps, confidence_level, is_split_risk_ratio
+        ).sum(-1)
+
+    per_token_logps = torch.gather(distribution_logps, dim=2, index=labels.unsqueeze(2)).squeeze(2)
+    per_reference_token_logps = torch.gather(reference_distribution_logps, dim=2, index=labels.unsqueeze(2)).squeeze(2)
+
+    logps_margin = per_token_logps - per_reference_token_logps
+
+    if weights is None:
+        weights = torch.ones_like(logps_margin)
+    else:
+        weights = weights[:, 1:].clone()
+
+    if average_log_prob:
+        denom = loss_mask.sum(-1)
+        return (
+            (logps_margin * weights * loss_mask).sum(-1) / denom,
+            (per_position_kl * weights * loss_mask).sum(-1) / denom,
+            (per_position_risk_ratio * weights * loss_mask).sum(-1) / denom,
+            (per_token_logps * weights * loss_mask).sum(-1) / denom,
+        )
+    else:
+        return (
+            (logps_margin * weights * loss_mask).sum(-1),
+            (per_position_kl * weights * loss_mask).sum(-1),
+            (per_position_risk_ratio * weights * loss_mask).sum(-1),
+            (per_token_logps * weights * loss_mask).sum(-1),
+        )
+
+
+def radpo_loss_fn(chosen_logps_margin: torch.FloatTensor,
+                  rejected_logps_margin: torch.FloatTensor,
+                  chosen_position_risk_ratio: torch.FloatTensor,
+                  rejected_position_risk_ratio: torch.FloatTensor,
+                  beta: float, alpha: float = 0.5, if_radpo2: bool = False):
+    """Compute the Ra-DPO loss for a batch of policy and reference model log probabilities."""
+    chosen_values = chosen_logps_margin + chosen_position_risk_ratio
+    rejected_values = rejected_logps_margin + rejected_position_risk_ratio
+    chosen_rejected_margin = chosen_logps_margin - rejected_logps_margin
+
+    if not if_radpo2:
+        logits = chosen_rejected_margin - (rejected_position_risk_ratio - chosen_position_risk_ratio)
+    else:
+        logits = chosen_rejected_margin - alpha * (rejected_position_risk_ratio - chosen_position_risk_ratio.detach())
+
+    losses = -F.logsigmoid(beta * logits)
+    chosen_rewards = beta * chosen_values.detach()
+    rejected_rewards = beta * rejected_values.detach()
+    return losses, chosen_rewards, rejected_rewards
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 class DistillTrainer(Trainer):
@@ -1387,6 +1547,71 @@ class DistillTrainer(Trainer):
         output["mean_rejected_logits"] = logits[num_examples:][loss_mask[num_examples:]].mean()
         return output
 
+    def radpo_concatenated_forward(self, model: nn.Module, batch: dict):
+        """Forward pass for Ra-DPO: computes log-prob margins, KL, and CVaR risk ratios.
+
+        Returns:
+            chosen_logps_margin, rejected_logps_margin,
+            chosen_position_kl, rejected_position_kl,
+            chosen_position_risk_ratio, rejected_position_risk_ratio,
+            chosen_logps (detached), rejected_logps (detached)
+        """
+        compte_ref_context_manager = amp.autocast("cuda") if self._peft_has_been_casted_to_bf16 else nullcontext()
+
+        num_examples = batch["prompt_input_ids"].shape[0]
+        concatenated_batch = self.concatenated_inputs(batch, padding_value=self.padding_value)
+        input_ids = concatenated_batch["completion_input_ids"]
+        attention_mask = concatenated_batch["completion_attention_mask"]
+        labels = concatenated_batch["completion_labels"]  # [2B, T], unsliced
+
+        # Policy forward – raw (unsliced) logits needed by _radpo_get_batch_logps
+        all_logits = model(input_ids=input_ids, attention_mask=attention_mask).logits.to(torch.float32)
+
+        # Reference forward
+        with torch.no_grad(), compte_ref_context_manager:
+            if self.ref_model is None:
+                with self.null_ref_context():
+                    ref_all_logits = self.model(
+                        input_ids=input_ids, attention_mask=attention_mask
+                    ).logits.to(torch.float32)
+            else:
+                ref_all_logits = self.ref_model(
+                    input_ids=input_ids, attention_mask=attention_mask
+                ).logits.to(torch.float32)
+
+        # Build concatenated per-token weights from batch if available (same padding as labels).
+        # Falls back to None → _radpo_get_batch_logps uses uniform 1.0 weights internally.
+        max_length = labels.shape[1]
+        if "chosen_weight" in batch and "rejected_weight" in batch:
+            concatenated_weights = torch.cat(
+                (
+                    pad_to_length(batch["chosen_weight"].float(), max_length, pad_value=0.0),
+                    pad_to_length(batch["rejected_weight"].float(), max_length, pad_value=0.0),
+                ),
+                dim=0,
+            ).to(labels.device)
+        else:
+            concatenated_weights = None
+
+        all_logps_margin, all_position_kl, all_position_risk_ratio, all_logps = _radpo_get_batch_logps(
+            all_logits, ref_all_logits, labels, concatenated_weights,
+            confidence_level=self.args.radpo_confidence_level,
+            is_split_risk_ratio=self.args.is_split_risk_ratio,
+            is_cal_risk_distribution_logps=self.args.is_cal_risk_distribution_logps,
+            average_log_prob=False,
+        )
+
+        return (
+            all_logps_margin[:num_examples],        # chosen_logps_margin
+            all_logps_margin[num_examples:],        # rejected_logps_margin
+            all_position_kl[:num_examples],         # chosen_position_kl
+            all_position_kl[num_examples:],         # rejected_position_kl
+            all_position_risk_ratio[:num_examples], # chosen_position_risk_ratio
+            all_position_risk_ratio[num_examples:], # rejected_position_risk_ratio
+            all_logps[:num_examples].detach(),      # chosen_logps
+            all_logps[num_examples:].detach(),      # rejected_logps
+        )
+
     @staticmethod
     def get_kl_loss(input_probs, target_probs, labels):
         mask = (labels != -100).to(input_probs.device)
@@ -1474,6 +1699,32 @@ class DistillTrainer(Trainer):
             metrics[f"{prefix}rewards/rejected"] = rejected_rewards.mean().cpu()
             metrics[f"{prefix}rewards/accuracies"] = reward_accuracies.mean().cpu()
             metrics[f"{prefix}rewards/margins"] = (chosen_rewards - rejected_rewards).mean().cpu()
+
+        # PART2.2: Ra-DPO loss
+        if self.args.radpo_weight > 0.0001:
+            (chosen_logps_margin, rejected_logps_margin,
+             chosen_position_kl, rejected_position_kl,
+             chosen_position_risk_ratio, rejected_position_risk_ratio,
+             radpo_chosen_logps, radpo_rejected_logps) = self.radpo_concatenated_forward(model, batch)
+
+            radpo_losses, radpo_chosen_rewards, radpo_rejected_rewards = radpo_loss_fn(
+                chosen_logps_margin, rejected_logps_margin,
+                chosen_position_risk_ratio, rejected_position_risk_ratio,
+                beta=self.args.beta,
+                alpha=self.args.radpo_alpha,
+                if_radpo2=self.args.if_radpo2,
+            )
+            losses = losses + self.args.radpo_weight * radpo_losses.mean()
+            radpo_reward_accuracies = (radpo_chosen_rewards > radpo_rejected_rewards).float()
+            metrics[f"{prefix}loss/radpo"] = radpo_losses.detach().mean().cpu().item()
+            metrics[f"{prefix}radpo_rewards/chosen"] = radpo_chosen_rewards.mean().cpu()
+            metrics[f"{prefix}radpo_rewards/rejected"] = radpo_rejected_rewards.mean().cpu()
+            metrics[f"{prefix}radpo_rewards/accuracies"] = radpo_reward_accuracies.mean().cpu()
+            metrics[f"{prefix}radpo_rewards/margins"] = (radpo_chosen_rewards - radpo_rejected_rewards).mean().cpu()
+            metrics[f"{prefix}radpo_kl/chosen"] = chosen_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_kl/rejected"] = rejected_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_risk/chosen"] = chosen_position_risk_ratio.detach().mean().cpu()
+            metrics[f"{prefix}radpo_risk/rejected"] = rejected_position_risk_ratio.detach().mean().cpu()
 
         #PART2.5 : Reference regularizer
         if self.args.kl_student_weight>0:
