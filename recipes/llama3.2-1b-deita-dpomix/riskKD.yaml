@@ -35,7 +35,7 @@ save_only_model: true
 seed: 42
 warmup_ratio: 0.1
 dataset_num_proc: 64
-beta: 0.01
+beta: 0.1
 
 # DPO
 sft_on_chosen: 0.0
@@ -61,7 +61,7 @@ qadapter_softvalue_type: "entropy"
 # Ra-DPO
 radpo_weight: 1.0
 radpo_alpha: 0.5
-radpo_confidence_level: 0.5
+radpo_confidence_level: 0.99
 if_radpo2: false
 is_split_risk_ratio: true
 is_cal_risk_distribution_logps: false
