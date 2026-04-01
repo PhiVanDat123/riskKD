@@ -65,3 +65,7 @@ radpo_confidence_level: 0.99
 if_radpo2: false
 is_split_risk_ratio: true
 is_cal_risk_distribution_logps: false
+
+#wandb
+report_to: wandb
+run_name: riskKD-llama3.2-1b

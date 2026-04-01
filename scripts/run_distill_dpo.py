@@ -74,6 +74,7 @@ if is_wandb_available():
 
 if is_deepspeed_available():
     import deepspeed
+
 def get_compressed_labels(labels: torch.Tensor, compressed_probs) -> torch.Tensor:
     """
     labels: [B, T] – original token indices (e.g. 50256 vocab)
@@ -2576,6 +2577,33 @@ class DistillTrainer(Trainer):
     def store_metrics(self, metrics: dict[str, float], train_eval: Literal["train", "eval"] = "train") -> None:
         for key, value in metrics.items():
             self._stored_metrics[train_eval][key].append(value)
+    
+    def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
+        train_eval = "train" if "loss" in logs else "eval"
+        # Add averaged stored metrics to logs
+        for key, metrics in self._stored_metrics[train_eval].items():
+            logs[key] = torch.tensor(metrics).mean().item()
+        del self._stored_metrics[train_eval]
+
+        # ── WandB logging ──────────────────────────────────────────
+        if is_wandb_available() and wandb.run is not None:
+            wandb_logs = {}
+            for k, v in logs.items():
+                # tensor → float
+                if isinstance(v, torch.Tensor):
+                    v = v.item()
+                # thêm prefix train/ hoặc eval/ nếu chưa có
+                if k.startswith("eval_"):
+                    wandb_logs["eval/" + k[len("eval_"):]] = v
+                else:
+                    wandb_logs["train/" + k] = v
+            wandb.log(wandb_logs, step=self.state.global_step)
+        # ───────────────────────────────────────────────────────────
+
+        if version.parse(transformers.__version__) >= version.parse("4.47.0.dev0"):
+            return super().log(logs, start_time)
+        else:  # transformers<=4.46
+            return super().log(logs)
 
     def evaluation_loop(
             self,
@@ -2626,7 +2654,7 @@ class DistillTrainer(Trainer):
         )
 
         return initial_output
-
+    '''
     def log(self, logs: dict[str, float], start_time: Optional[float] = None) -> None:
         """
         Log `logs` on the various objects watching training, including stored metrics.
@@ -2648,7 +2676,7 @@ class DistillTrainer(Trainer):
             return super().log(logs, start_time)
         else:  # transformers<=4.46
             return super().log(logs)
-
+    '''
 
 def main():
     parser = H4ArgumentParser((ModelArguments, DataArguments, CustomDPOConfig))
@@ -2677,6 +2705,29 @@ def main():
 
     # Set seed for reproducibility
     set_seed(training_args.seed)
+
+    # ── WandB init ─────────────────────────────────────────────────
+    if is_wandb_available() and "wandb" in (training_args.report_to or []):
+        wandb.init(
+            project=os.environ.get("WANDB_PROJECT", "distill-trainer"),
+            name=training_args.run_name,
+            config={
+                "model": model_args.model_name_or_path,
+                "learning_rate": training_args.learning_rate,
+                "beta": training_args.beta,
+                "loss_type": training_args.loss_type,
+                "sft_on_chosen": training_args.sft_on_chosen,
+                "dpo_weight": training_args.dpo_weight,
+                "adpa_weight": training_args.adpa_weight,
+                "adpa_loss_type": training_args.adpa_loss_type,
+                "distillation_weight": training_args.distillation_weight,
+                "radpo_weight": training_args.radpo_weight,
+                "radpo_confidence_level": training_args.radpo_confidence_level,
+                "if_radpo2": training_args.if_radpo2,
+            },
+            resume="allow",
+        )
+    # ───────────────────────────────────────────────────────────────
 
     ###############
     # Load datasets
@@ -2808,6 +2859,11 @@ def main():
     trainer.log_metrics("train", metrics)
     trainer.save_metrics("train", metrics)
     trainer.save_state()
+
+    # ── WandB finish ───────────────────────────────────────────
+    if is_wandb_available() and wandb.run is not None:
+        wandb.finish()
+    # ───────────────────────────────────────────────────────────
 
     logger.info("*** Training complete ***")
 
