@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 \
+CUDA_VISIBLE_DEVICES=0,1 \
 ACCELERATE_LOG_LEVEL=info \
 DS_SKIP_CUDA_CHECK=1 \
 python -m accelerate.commands.launch \

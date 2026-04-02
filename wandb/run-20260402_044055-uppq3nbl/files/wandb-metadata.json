@@ -1,0 +1,50 @@
+{
+  "os": "Linux-6.8.0-90-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.10.20",
+  "startedAt": "2026-04-02T04:40:55.021888Z",
+  "args": [
+    "recipes/llama3.2-1b-deita-dpomix/riskKD.yaml"
+  ],
+  "program": "/mnt/datpv/riskKD/scripts/run_distill_dpo.py",
+  "codePath": "scripts/run_distill_dpo.py",
+  "codePathLocal": "scripts/run_distill_dpo.py",
+  "git": {
+    "remote": "https://github.com/PhiVanDat123/riskKD.git",
+    "commit": "2ef2b7dd9ce632806b158fe7c54be38adccd205d"
+  },
+  "email": "phivandat2005@gmail.com",
+  "root": "/mnt/datpv/riskKD",
+  "host": "ai-train-a40-1",
+  "executable": "/mnt/datpv/miniconda3/envs/tvkd/bin/python",
+  "cpu_count": 52,
+  "cpu_count_logical": 52,
+  "gpu": "NVIDIA A40",
+  "gpu_count": 2,
+  "disk": {
+    "/": {
+      "total": "31591473152",
+      "used": "23707721728"
+    }
+  },
+  "memory": {
+    "total": "485865242624"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA A40",
+      "memoryTotal": "48305799168",
+      "cudaCores": 10752,
+      "architecture": "Ampere",
+      "uuid": "GPU-3dac019c-7311-8c07-a508-6a39b592e0c4"
+    },
+    {
+      "name": "NVIDIA A40",
+      "memoryTotal": "48305799168",
+      "cudaCores": 10752,
+      "architecture": "Ampere",
+      "uuid": "GPU-2166eb19-46f6-775f-07bd-58cbacb71ebc"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "gfdtywptzt33hjpsf3ol3v8l3xu1bork"
+}

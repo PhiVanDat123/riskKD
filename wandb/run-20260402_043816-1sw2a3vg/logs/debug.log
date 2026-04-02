@@ -1,0 +1,19 @@
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_setup.py:_flush():81] Current SDK version is 0.25.1
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_setup.py:_flush():81] Configure stats pid to 608619
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /mnt/datpv/riskKD/wandb/run-20260402_043816-1sw2a3vg/logs/debug.log
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /mnt/datpv/riskKD/wandb/run-20260402_043816-1sw2a3vg/logs/debug-internal.log
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_init.py:init():844] calling init triggers
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'model': 'meta-llama/Llama-3.2-1B', 'learning_rate': 5e-07, 'beta': 0.1, 'loss_type': 'sigmoid', 'sft_on_chosen': 0.0, 'dpo_weight': 1e-05, 'adpa_weight': 0, 'adpa_loss_type': 'reverse_ce', 'distillation_weight': 0, 'radpo_weight': 1.0, 'radpo_confidence_level': 0.99, 'if_radpo2': False, '_wandb': {}}
+2026-04-02 04:38:16,795 INFO    MainThread:608619 [wandb_init.py:init():892] starting backend
+2026-04-02 04:38:17,014 INFO    MainThread:608619 [wandb_init.py:init():895] sending inform_init request
+2026-04-02 04:38:17,018 INFO    MainThread:608619 [wandb_init.py:init():903] backend started and connected
+2026-04-02 04:38:17,019 INFO    MainThread:608619 [wandb_init.py:init():973] updated telemetry
+2026-04-02 04:38:17,039 INFO    MainThread:608619 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-04-02 04:38:18,486 INFO    MainThread:608619 [wandb_init.py:init():1042] starting run threads in backend
+2026-04-02 04:38:18,594 INFO    MainThread:608619 [wandb_run.py:_console_start():2524] atexit reg
+2026-04-02 04:38:18,594 INFO    MainThread:608619 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-04-02 04:38:18,594 INFO    MainThread:608619 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-04-02 04:38:18,594 INFO    MainThread:608619 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-04-02 04:38:18,599 INFO    MainThread:608619 [wandb_init.py:init():1082] run started, returning control to user process

@@ -1,20 +1,19 @@
 # riskKD: TVKD + Ra-DPO loss
 # Model arguments
-model_name_or_path: /home/minchan.kwon/ADPA/model/dpo_student
+model_name_or_path: meta-llama/Llama-3.2-1B
 torch_dtype: bfloat16
 
 # Data training arguments
 dataset_mixer:
-  /home/minchan.kwon/ADPA/data/llama3.2-1b-deita-dpomix/dpomix7k-dckd: 1.0
+  /mnt/datpv/riskKD/datasets/data: 1.0
 dataset_splits:
 - train
 preprocessing_num_workers: 12
-overwrite_output_dir: false
 
 # DPOTrainer arguments
 bf16: true
 do_eval: false
-gradient_accumulation_steps: 16
+gradient_accumulation_steps: 1
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: False
@@ -26,7 +25,7 @@ max_length: 2048
 max_prompt_length: 1800
 num_train_epochs: 5
 optim: adamw_torch
-output_dir: /home/minchan.kwon/ADPA/model/riskKD
+output_dir: /mnt/datpv/riskKD/output/riskKD
 per_device_train_batch_size: 1
 push_to_hub: false
 save_strategy: "steps"
@@ -42,8 +41,8 @@ sft_on_chosen: 0.0
 sft_on_rejected: 0.0
 dpo_weight: 0.00001
 distillation_weight: 0
-chosen_distil_weight: 0.0001
-rejected_distil_weight: 0.0001
+chosen_distil_weight: 0
+rejected_distil_weight: 0
 adpa_weight: 0
 qadapter_distil_weight: 0
 qadapter_loss_type: "dpo"

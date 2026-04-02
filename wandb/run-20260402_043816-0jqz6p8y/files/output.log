@@ -1,0 +1,515 @@
+[34m[1mwandb[0m: Detected [huggingface_hub.inference] in use.
+[34m[1mwandb[0m: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+[34m[1mwandb[0m: For more information, check out the docs at: https://weave-docs.wandb.ai/
+2026-04-02 04:38:19 - INFO - __main__ - Training on the following splits: ['train : 6750']
+2026-04-02 04:38:19 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/config.json "HTTP/1.1 200 OK"
+[INFO|configuration_utils.py:757] 2026-04-02 04:38:19,931 >> loading configuration file config.json from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/config.json
+[INFO|configuration_utils.py:824] 2026-04-02 04:38:19,933 >> Model config LlamaConfig {
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 128000,
+  "dtype": "bfloat16",
+  "eos_token_id": 128001,
+  "head_dim": 64,
+  "hidden_act": "silu",
+  "hidden_size": 2048,
+  "initializer_range": 0.02,
+  "intermediate_size": 8192,
+  "max_position_embeddings": 131072,
+  "mlp_bias": false,
+  "model_type": "llama",
+  "num_attention_heads": 32,
+  "num_hidden_layers": 16,
+  "num_key_value_heads": 8,
+  "pad_token_id": null,
+  "pretraining_tp": 1,
+  "rms_norm_eps": 1e-05,
+  "rope_parameters": {
+    "factor": 32.0,
+    "high_freq_factor": 4.0,
+    "low_freq_factor": 1.0,
+    "original_max_position_embeddings": 8192,
+    "rope_theta": 500000.0,
+    "rope_type": "llama3"
+  },
+  "tie_word_embeddings": true,
+  "transformers_version": "5.4.0",
+  "use_cache": true,
+  "vocab_size": 128256
+}
+2026-04-02 04:38:20 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-04-02 04:38:20 - INFO - httpx - HTTP Request: GET https://huggingface.co/api/models/meta-llama/Llama-3.2-1B/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-04-02 04:38:20 - INFO - httpx - HTTP Request: GET https://huggingface.co/api/models/meta-llama/Llama-3.2-1B/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-04-02 04:38:21 - INFO - httpx - HTTP Request: GET https://huggingface.co/api/models/meta-llama/Llama-3.2-1B "HTTP/1.1 200 OK"
+2026-04-02 04:38:22 - INFO - __main__ - Prompt sample 5238 of the raw training set:
+
+<|system|>
+<|end_of_text|>
+<|user|>
+Identify five different types of caves found around the world and provide a brief explanation for each.<|end_of_text|>
+<|assistant|>
+1. Limestone caves: These are the most common type of caves and are formed through the dissolution of soluble rocks like limestone, dolomite, and gypsum. Over time, water containing dissolved carbon dioxide seeps into the cracks and crevices in these rocks, dissolving them and creating cavities that eventually form a cave system. Famous examples include Mammoth Cave in Kentucky, USA, and Carlsbad Caverns in New Mexico, USA.
+
+2. Lava tubes: These caves are formed during volcanic eruptions when lava flows downhill from a volcano and cools on the surface while still remaining hot and flowing underneath. As the lava drains away, it leaves behind an empty tube-like structure known as a lava tube. Examples of lava tube caves can be found in Hawaii Volcanoes National Park, USA, and Jeju Island, South Korea.
+
+3. Sea caves: Also known as littoral caves, sea caves are formed by the erosive action of waves along coastal cliffs made of softer rock types. The constant pounding of waves against the cliff face causes cracks to widen and deepen over time, eventually forming a cave. Sea caves can be found around the world, including the famous Painted Cave on Santa Cruz Island, California, USA, and the Blue Grotto in Capri, Italy.
+
+4. Ice caves: These caves are formed within glaciers or ice formations due to melting and refreezing processes. Meltwater creates channels and cavities within the ice, which can grow larger over time. Some ice caves are seasonal, disappearing when temperatures rise, while others are more permanent features within glaciers. Notable ice caves include Eisriesenwelt in Austria and Vatnajokull Glacier in Iceland.
+
+5. Solutional caves: Similar to limestone caves, solutional caves are formed by the dissolution of soluble rocks, but they typically occur in areas with different geological conditions, such as in salt or quartzite formations. These caves are less common than limestone caves and can be found in locations like the Detroit Salt Mine in Michigan, USA, and the Nacimiento del Río Mundo cave in Spain.<|end_of_text|>
+<|user|>
+Discuss the geological processes and conditions that lead to the formation of each type of cave you've mentioned, and explain how these processes differ from one another.<|end_of_text|>
+<|assistant|>
+1. Limestone caves: These caves are formed through a process known as karstification, which involves the dissolution of soluble rocks, primarily limestone. Rainwater absorbs carbon dioxide from the atmosphere and soil, forming a weak carbonic acid. This acid seeps into the ground and reacts with the calcium carbonate in limestone, dissolving it. Over thousands to millions of years, this process can create extensive cave systems.
+
+2. Lava tubes: These caves are created through volcanic activity. During a volcanic eruption, lava flows downhill and cools on the surface, forming a hard crust. However, underneath this crust, the lava remains hot and continues to flow. Once the eruption ceases, the remaining lava drains out, leaving behind a hollow tube. This process is quite different from karstification, as it involves the solidification of molten rock rather than the dissolution of solid rock.
+
+3. Sea caves: The formation of sea caves involves the mechanical and chemical erosion of coastal cliffs by seawater. Waves crashing against the cliff face cause mechanical erosion, while the salt in seawater can cause chemical weathering. Over time, these processes can carve out caves in the cliff. This is a different process from both karstification and the formation of lava tubes, as it involves the direct action of water on rock rather than the dissolution or solidification of rock.
+
+4. Ice caves: These caves are formed within glaciers or ice formations due to the action of meltwater. As the ice melts, water flows along the path of least resistance, creating channels and cavities. These can grow larger over time due to further melting and the action of wind. This process is unique in that it involves the melting and refreezing of ice rather than the dissolution or erosion of rock.
+
+5. Solutional caves: These caves are formed in a similar way to limestone caves, through the dissolution of soluble rocks. However, the types of rock involved are different, such as salt or quartzite. The dissolution process involves water, but instead of carbonic acid, other types of acid may be involved, depending on the type of rock. For example, sulfuric acid can dissolve gypsum to form caves. This process is similar to karstification but differs in the types of rock and acid involved.<|end_of_text|>
+<|user|>
+Explain the role of sulfuric acid in the formation of solutional caves in gypsum formations.<|end_of_text|>
+<|assistant|>
+In gypsum formations, solutional caves can be formed through the action of sulfuric acid. This process, known as speleogenesis, involves the interaction of water with the mineral anhydrite, which is often found in association with gypsum.
+
+Anhydrite (CaSO4) is relatively insoluble in water. However, when it comes into contact with water, it can slowly transform into gypsum (CaSO4·2H2O), which is more soluble. This transformation process can create micro-cracks in the rock, allowing more water to penetrate and dissolve the gypsum.
+
+Sulfuric acid plays a crucial role in this process. It can be produced by certain types of bacteria that oxidize hydrogen sulfide (H2S) gas, which can be found in oil deposits or hot springs often associated with gypsum formations. The sulfuric acid produced by these bacteria can react with the gypsum to form calcium sulfate, which is highly soluble, and carbon dioxide.
+
+The chemical reaction is as follows:
+
+H2SO4 (sulfuric acid) + CaSO4·2H2O (gypsum) -> CaSO4 (calcium sulfate) + 2H2O (water) + CO2 (carbon dioxide)
+
+This process of dissolution by sulfuric acid can create extensive cave systems in gypsum formations over time. The Lechuguilla Cave in New Mexico, USA, is a famous example of a gypsum cave formed through this process.<|end_of_text|>
+<|user|>
+Elaborate on the specific types of bacteria involved in the oxidation of hydrogen sulfide gas in the formation of sulfuric acid within gypsum formations.<|end_of_text|>
+<|assistant|>
+
+2026-04-02 04:38:22 - INFO - __main__ - Chosen sample 5238 of the raw training set:
+
+The oxidation of hydrogen sulfide (H2S) to form sulfuric acid (H2SO4) in cave environments is often facilitated by sulfur-oxidizing bacteria. These are chemolithotrophic bacteria, meaning they derive energy from inorganic compounds, in this case, hydrogen sulfide.
+
+Several types of bacteria are known to perform this function, including species from the genera Beggiatoa, Thiobacillus, and Thiothrix. These bacteria are often found in sulfur-rich environments, such as hot springs, hydrothermal vents, and sulfur caves.
+
+Beggiatoa species are known for their ability to oxidize hydrogen sulfide, using it as an energy source to convert carbon dioxide into organic compounds in a process known as chemosynthesis. Thiobacillus species, on the other hand, are known for their role in the sulfur cycle, oxidizing sulfur compounds to sulfate. Thiothrix species also participate in the sulfur cycle and are known for forming filamentous microbial mats in sulfur-rich environments.
+
+These bacteria facilitate the conversion of hydrogen sulfide to sulfuric acid through a series of redox reactions. The sulfuric acid can then react with the gypsum in the cave environment, contributing to the formation and enlargement of caves.<|end_of_text|>
+2026-04-02 04:38:22 - INFO - __main__ - Rejected sample 5238 of the raw training set:
+
+The specific types of bacteria involved in the oxidation of hydrogen sulfide gas (H2S) to produce sulfuric acid (H2SO4) are generally called sulfur-oxidizing bacteria (SOB). These microorganisms oxidize H2S to sulfate (SO4^2-) at different levels of oxidation, producing sulfuric acid as a byproduct. There are two main groups of SOB:
+
+1. Thiomargarita namibiensis: This is a filamentous photosynthetic bacterium that was discovered in the sulfide-rich sediments of the Namibian coastal desert. It was the first bacterium to be identified as responsible for the oxidation of H2S in marine environments. This photosynthetic bacterium utilizes H2S as an electron donor and can fix atmospheric CO2 to produce organic carbon, contributing to the biogeochemical cycle of carbon, sulfur, and nitrogen in these ecosystems.
+
+2. Various Chemoautotrophic bacteria: These include genera such as Beggiatoa, Thiobacillus, and Paracoccus. Chemoautotrophic bacteria are capable of converting inorganic compounds like H2S into organic matter using energy from chemical reactions, rather than from sunlight as in photosynthesis. Some Thiobacillus species, such as T. thiooxidans and T. sulfooxidans, are notably efficient in oxidizing H2S to sulfate.
+
+In the context of gypsum cave formation, these bacteria can contribute to the creation of sulfuric acid, which in turn reacts with gypsum to dissolve it and form caves. The specific type of bacteria present depends on environmental conditions, such as the availability of H2S, oxygen, temperature, and pH. These factors influence the types of microbial communities that can thrive and contribute to the formation of sulfuric acid within gypsum formations.<|end_of_text|>
+2026-04-02 04:38:22 - INFO - __main__ - Prompt sample 912 of the raw training set:
+
+<|system|>
+<|end_of_text|>
+<|user|>
+In Greek mythology, who was the lesser-known second cousin of the king of the gods?<|end_of_text|>
+<|assistant|>
+Greek mythology is comprised of a complex network of gods, demigods, titans, and mythological beings, each with their own distinctive stories and connections. The "king of the gods" in Greek mythology typically refers to Zeus, the god of the sky, lightning, thunder, law, order, and justice.
+
+However, describing a specific figure as the "lesser-known second cousin of Zeus" can be a bit tricky, given the intricate family tree of Greek mythology. It's important to remember that in Greek mythology, families are not as simply defined as in human terms, and relationships are very interconnected due to various liaisons among gods, titans, nymphs, and mortals.
+
+One such possible character could be Prometheus, a Titan who is identified as a second cousin of Zeus. Prometheus was renowned for his intelligence and as a champion of mankind, and is best known for stealing fire from the gods and giving it to the human race, an act that led to his eternal punishment. Even though Prometheus played a pivotal role in the mythology and was quite influential, he is often overlooked and therefore might be considered "lesser-known" compared to the primary Olympian gods.
+
+Nevertheless, this designation of "lesser-known second cousin" could vary depending on the interpretation and which particular element of the sprawling Greek mythology family tree one is focusing on.<|end_of_text|>
+<|user|>
+Explain the significance of Prometheus's act of stealing fire from the gods in Greek mythology.<|end_of_text|>
+<|assistant|>
+Prometheus's act of stealing fire from the gods is a pivotal moment in Greek mythology. This act is not just about the literal giving of fire to humans, but it symbolizes a significant shift in the balance of power from the gods to humanity.
+
+Fire, in this context, represents knowledge, enlightenment, and civilization. It was the tool that allowed humans to cook food, forge metal, and essentially advance as a species. By stealing fire from the gods and giving it to humans, Prometheus essentially gave humans the means to progress and evolve, to become more god-like themselves.
+
+This act was also a form of rebellion against the gods, particularly Zeus. It showed Prometheus's sympathy and care for humans, who were struggling and living in darkness without the benefits of fire. His defiance of Zeus's will underscores his role as a trickster and a champion of humanity.
+
+However, this act came with severe consequences. As punishment for his transgression, Zeus had Prometheus chained to a rock where an eagle would eat his liver every day, only for it to regenerate and be eaten again the next day. This punishment was eternal, reflecting the gods' wrath at his audacious act.
+
+In a broader sense, the story of Prometheus can be seen as a cautionary tale about the dangers and costs of defying the gods, or more generally, of challenging authority. It also raises questions about the ethics of disobedience for a greater cause, the struggle for knowledge, and the price of progress.<|end_of_text|>
+<|user|>
+Can you elaborate on the ethical implications of Prometheus's act of disobedience for a greater cause?<|end_of_text|>
+<|assistant|>
+
+2026-04-02 04:38:22 - INFO - __main__ - Chosen sample 912 of the raw training set:
+
+Certainly, the story of Prometheus can be interpreted as a rich exploration of ethical themes, particularly those related to disobedience, sacrifice, and the greater good.
+
+Prometheus's act of stealing fire from the gods and giving it to humans was a clear act of disobedience against the divine authority, particularly Zeus. However, it was done with the intention of helping humanity, a less powerful and more vulnerable group in the cosmic hierarchy. This presents an ethical dilemma: is it right to disobey authority if it's done to help others?
+
+Prometheus's act can be seen as a form of civil disobedience, a concept that has been a significant part of many social and political movements throughout history. Civil disobedience involves breaking the law or defying authority to bring about change, often for the benefit of a marginalized or disadvantaged group. In this light, Prometheus can be seen as a revolutionary figure, standing up against the gods on behalf of humanity.
+
+On the other hand, his act also resulted in severe personal suffering, as he was punished by Zeus with eternal torment. This introduces the theme of sacrifice for the greater good. Prometheus was willing to endure immense personal pain to bring knowledge and progress to humanity. This raises questions about the ethics of self-sacrifice and the lengths one should go to for the benefit of others.
+
+Furthermore, the story also touches on the concept of "knowledge as power" and who has the right to possess and distribute it. Prometheus's act democratized knowledge, transferring it from the exclusive domain of the gods to the realm of humans. This raises ethical questions about the control and dissemination of knowledge, which are still very relevant in today's information age.
+
+In conclusion, the story of Prometheus offers a rich exploration of ethical themes that continue to resonate today. It invites us to consider the complexities of disobedience, sacrifice, and the distribution of knowledge, and the ethical implications of these actions.<|end_of_text|>
+2026-04-02 04:38:22 - INFO - __main__ - Rejected sample 912 of the raw training set:
+
+Prometheus's act of disobedience in stealing fire from the gods raises several compelling questions regarding ethics, morality, and the pursuit of knowledge or progress. Below are some of the implications from philosophical, religious, and societal perspectives:
+
+1. Ethical Implications: Prometheus's act demonstrated a sense of empathy and care for humanity. He defied the established power structure to offer humans a means of enlightenment, growth and self-sufficiency. Prometheus perceived that the gods held a monopoly on power and resources, withholding such assets from humans, depriving them of opportunities to progress, and living in confinement; it wasn't their fault, their state was solely attributed to their god-given condition. That triggered him into bringing fire, for its reconciliatory and practical benefits to humankind. In other words, Prometheus’s behavior exhibited elements of acting as a benevolent agent in the lives of Humans. One may argue that he tested the boundaries of right and wrong, but looking at the outcome, his actions indeed led to a higher purpose. 2. Moral Implications: However, such an act of defiance defied the standards set forth by Zeus, the ruler of the gods, and violated their beliefs and values. Additionally, the act gave rise to conflict, because the Gods had decreed that fire is their property, and, by taking it away, Prometheus broke that divinely instituted trust and social contract. For Zeus, the cause of justice, a core virtue, was comprised of the gods not being involved in human affairs; mankind was expected to worship them and obey the laws of nature. Prometheus’s act, in that sense, challenged the order advocated by their gods and levels of power. 3. Societal Implications: If we consider the role of religion and mythologies, the punishment bestowed upon Prometheus exhibited that Gods vied in maintaining their superiority to human beings. This is why the gods are depicted with human-like traits, as they reside above the human realm – divine, omnipotent, and almost perfect. The ancient world operated upon the notion that the gods encouraged a system of worship established through obedience and fear. Yet, by being the opposition, Prometheus signified a new phase of human history's evolution, upending such a commanding and deifying status quo. In conclusion, Prometheus's act of disobedience can be read from different perspectives: a sense of responsibility, a pioneer of humanism, or a rebel leader. The story teaches humankind a valuable moral lesson - together with the value of progress, they must also acknowledge and consider which factors affect the decision-making process and should follow this balance spiritually, morally, and ethically.<|end_of_text|>
+2026-04-02 04:38:22 - INFO - __main__ - Prompt sample 204 of the raw training set:
+
+<|system|>
+<|end_of_text|>
+<|user|>
+Implement a basic Tic-Tac-Toe game in Python using object-oriented programming principles. The game should support two players taking turns on the command line, display the current board state after each move, and detect when a player has won or the game is a draw.
+PLAINFORMAT
+<|end_of_text|>
+<|assistant|>
+class TicTacToe:
+    def __init__(self):
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.current_player = "X"
+
+    def display_board(self):
+        for row in self.board:
+            print("|".join(row))
+            print("-" * 5)
+
+    def is_valid_move(self, row, col):
+        return self.board[row][col] == ' '
+
+    def make_move(self, row, col):
+        if not self.is_valid_move(row, col):
+            return False
+
+        self.board[row][col] = self.current_player
+        if self.check_winner():
+            print(f"Player {self.current_player} wins!")
+            return True
+
+        if self.check_draw():
+            print("It's a draw!")
+            return True
+
+        self.switch_player()
+        return False
+
+    def check_winner(self):
+        for row in self.board:
+            if row[0] == row[1] == row[2] != ' ':
+                return True
+
+        for col in range(3):
+            if self.board[0][col] == self.board[1][col] == self.board[2][col] != ' ':
+                return True
+
+        if self.board[0][0] == self.board[1][1] == self.board[2][2] != ' ':
+            return True
+
+        if self.board[0][2] == self.board[1][1] == self.board[2][0] != ' ':
+            return True
+
+        return False
+
+    def check_draw(self):
+        for row in self.board:
+            for cell in row:
+                if cell == ' ':
+                    return False
+        return True
+
+    def switch_player(self):
+        if self.current_player == "X":
+            self.current_player = "O"
+        else:
+            self.current_player = "X"
+
+    def play(self):
+        print("Welcome to Tic Tac Toe!")
+        self.display_board()
+
+        while True:
+            row = int(input(f"Player {self.current_player}, enter the row (0-2): "))
+            col = int(input(f"Player {self.current_player}, enter the column (0-2): "))
+
+            if 0 <= row < 3 and 0 <= col < 3:
+                if self.make_move(row, col):
+                    self.display_board()
+                    break
+                self.display_board()
+            else:
+                print("Invalid input. Please try again.")
+
+
+if __name__ == "__main__":
+    game = TicTacToe()
+    game.play()<|end_of_text|>
+<|user|>
+How would you modify the above Tic Tac Toe game to include an AI opponent using a simple strategy, such as blocking the player's winning moves or randomly selecting an available spot?<|end_of_text|>
+<|assistant|>
+To modify the game to include an AI opponent, we would need to add some logic to the make_move method to decide the AI's move when it's their turn. A simple strategy could be to first check if the player is about to win and block them, and if not, select a random available spot.
+
+Here's how you could implement this:
+
+```python
+import random
+
+class TicTacToe:
+    def __init__(self):
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.current_player = "X"
+
+    # ... rest of the class as before ...
+
+    def get_empty_cells(self):
+        return [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == ' ']
+
+    def ai_move(self):
+        # Check if player is about to win and block them
+        for i, j in self.get_empty_cells():
+            self.board[i][j] = "X"  # Assume player is "X"
+            if self.check_winner():
+                self.board[i][j] = "O"  # AI is "O"
+                return
+            self.board[i][j] = ' '  # Reset cell
+
+        # If no blocking move is found, select a random available spot
+        i, j = random.choice(self.get_empty_cells())
+        self.board[i][j] = "O"
+
+    def play(self):
+        print("Welcome to Tic Tac Toe!")
+        self.display_board()
+
+        while True:
+            if self.current_player == "X":
+                row = int(input("Player X, enter the row (0-2): "))
+                col = int(input("Player X, enter the column (0-2): "))
+                if 0 <= row < 3 and 0 <= col < 3 and self.make_move(row, col):
+                    self.display_board()
+                    if self.check_winner() or self.check_draw():
+                        break
+            else:
+                self.ai_move()
+                self.display_board()
+                if self.check_winner() or self.check_draw():
+                    break
+            self.switch_player()
+
+if __name__ == "__main__":
+    game = TicTacToe()
+    game.play()
+```
+
+In this version, when it's the AI's turn (when `self.current_player` is "O"), the `ai_move` method is called. This method first checks if the player is about to win by trying to place the player's piece in each<|end_of_text|>
+<|user|>
+Explain the logic behind the AI's strategy in the modified Tic Tac Toe game.<|end_of_text|>
+<|assistant|>
+The AI's strategy in the modified Tic Tac Toe game is quite simple and follows two main steps:
+
+1. **Block the player's winning move:** The AI checks if the player is about to win on their next move. It does this by iterating over all the empty cells on the board and temporarily placing the player's piece ("X") in each one. If any of these moves would result in the player winning (checked using the `check_winner` method), the AI places its own piece ("O") in that cell, effectively blocking the player's win. If no such cell is found, it moves on to the next step.
+
+2. **Randomly select an available spot:** If the player is not about to win on their next move, the AI simply selects a random cell from all the empty cells on the board and places its piece there.
+
+This strategy ensures that the AI will always block the player's winning move if one is available. If not, it makes a random move. This strategy doesn't guarantee that the AI will win the game, but it does make it more challenging for the player. A more advanced strategy could involve the AI trying to create its own winning opportunities, but that would be more complex to implement.<|end_of_text|>
+<|user|>
+Can you elaborate on how you would enhance the AI's strategy to not only block the player's winning moves but also create its own winning opportunities?<|end_of_text|>
+<|assistant|>
+
+2026-04-02 04:38:22 - INFO - __main__ - Chosen sample 204 of the raw training set:
+
+To enhance the AI's strategy to create its own winning opportunities, we could add another step in the `ai_move` method. Before checking for blocking moves or making a random move, the AI could first check if it has a winning move available. This can be done in a similar way to the blocking step, but instead of placing the player's piece in each empty cell to check for a win, the AI places its own piece. Here's how this could be implemented:
+
+```python
+def ai_move(self):
+    # Check if AI has a winning move and make it
+    for i, j in self.get_empty_cells():
+        self.board[i][j] = "O"  # Assume AI is "O"
+        if self.check_winner():
+            return
+        self.board[i][j] = ' '  # Reset cell
+
+    # If no winning move is found, check if player is about to win and block them
+    for i, j in self.get_empty_cells():
+        self.board[i][j] = "X"  # Assume player is "X"
+        if self.check_winner():
+            self.board[i][j] = "O"  # AI is "O"
+            return
+        self.board[i][j] = ' '  # Reset cell
+
+    # If no blocking move is found, select a random available spot
+    i, j = random.choice(self.get_empty_cells())
+    self.board[i][j] = "O"
+```
+
+With this enhanced strategy, the AI will first check if it can win on its current move. If it can, it will make that move and win the game. If it can't, it will then check if the player is about to win and block them if necessary. If the player is not about to win, the AI will make a random move. This makes the AI a much more formidable opponent, as it not only blocks the player's winning moves but also actively tries to win the game itself.<|end_of_text|>
+2026-04-02 04:38:22 - INFO - __main__ - Rejected sample 204 of the raw training set:
+
+Sure, to create its own winning opportunities, the AI would need to have some knowledge of the game state and the possible moves that could lead to a win. One way to do this is to use minimax algorithm with alpha-beta pruning or negamax algorithm to search the possible future board states until it finds a winning move.
+
+Here are the high-level steps that you could follow to enhance the AI's strategy:
+
+1. **Evaluate the game state:** Calculate a heuristic value for the current board state which represents how good, bad or about equal it is for the AI. This value should take into account factors like the number and position of the pieces, available options (moves that can be made), and any other features like diagonals. 2. **Generate the winning moves:** Find all the possible moves that result in a winning position for the AI. This could be done by enumerating all possible moves and using a search algorithm to evaluate their respective outcomes. This algorithm needs to check if the move is valid (calling `is_valid_move`) and if the AI would win (by calling `check_winner`) after making the move. 3. **Choose the best move:** Select the move that results in the most favorable board state (based on the heuristic value) for the AI. This decision can be made using a search algorithm that explores the possible future board states in a tree-like structure from the current board state until a winning move is found. To make the search efficient and avoid redundant calculations, you can use pruning strategies like alpha-beta pruning, or negamax algorithm. 4. **Incorporate the opponent considering moves, blocks, and counter-moves:** While the previous steps would generate winning moves, it's possible the opponent may preemptively counter those moves. Therefore, the AI should expand its strategy to include opponent considering moves and utilities. This analysis can be done by inserting random games from the start of the match till current state to determine the next best move. This would equate to the opponent considering moves, blocks, and counter-moves. 5. **Rank moves from best to worst:** If there is no clear winning move, the AI should select the move that gives it the best position or forces a draw., ranking them in order of preference, the algorithm can consult the game engine to create an approximation of the winning probability of each move, this approximation will be our heuristic value.
+Omega pruning can also be employed to speed up the search tree. 6. **Apply the best move:** Once the best move is chosen for the AI, the player can make the move on the board and the algorithm ensues. I hope, these insights help you Enhance the AI's Strategy in the game!<|end_of_text|>
+2026-04-02 04:38:22 - INFO - httpx - HTTP Request: GET https://huggingface.co/api/models/meta-llama/Llama-3.2-1B/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-04-02 04:38:22 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/config.json "HTTP/1.1 200 OK"
+
+[INFO|configuration_utils.py:757] 2026-04-02 04:38:22,623 >> loading configuration file config.json from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/config.json
+[INFO|configuration_utils.py:824] 2026-04-02 04:38:22,625 >> Model config LlamaConfig {
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 128000,
+  "dtype": "bfloat16",
+  "eos_token_id": 128001,
+  "head_dim": 64,
+  "hidden_act": "silu",
+  "hidden_size": 2048,
+  "initializer_range": 0.02,
+  "intermediate_size": 8192,
+  "max_position_embeddings": 131072,
+  "mlp_bias": false,
+  "model_type": "llama",
+  "num_attention_heads": 32,
+  "num_hidden_layers": 16,
+  "num_key_value_heads": 8,
+  "pad_token_id": null,
+  "pretraining_tp": 1,
+  "rms_norm_eps": 1e-05,
+  "rope_parameters": {
+    "factor": 32.0,
+    "high_freq_factor": 4.0,
+    "low_freq_factor": 1.0,
+    "original_max_position_embeddings": 8192,
+    "rope_theta": 500000.0,
+    "rope_type": "llama3"
+  },
+  "tie_word_embeddings": true,
+  "transformers_version": "5.4.0",
+  "use_cache": true,
+  "vocab_size": 128256
+}
+2026-04-02 04:38:22 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/config.json "HTTP/1.1 200 OK"
+
+[INFO|modeling_utils.py:709] 2026-04-02 04:38:22,865 >> loading weights file model.safetensors from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/model.safetensors
+[INFO|modeling_utils.py:779] 2026-04-02 04:38:22,866 >> Will use dtype=torch.bfloat16 as defined in model's config object
+[INFO|modeling_utils.py:3608] 2026-04-02 04:38:22,866 >> Detected DeepSpeed ZeRO-3: activating zero.init() for this model
+[INFO|configuration_utils.py:1027] 2026-04-02 04:38:22,873 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "eos_token_id": 128001,
+  "output_attentions": false,
+  "output_hidden_states": false,
+  "use_cache": true
+}
+[2026-04-02 04:38:24,336] [INFO] [partition_parameters.py:345:__exit__] finished initializing model - num_params = 147, num_elems = 1.50B
+2026-04-02 04:38:25 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/generation_config.json "HTTP/1.1 200 OK"
+
+[INFO|configuration_utils.py:980] 2026-04-02 04:38:25,399 >> loading configuration file generation_config.json from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/generation_config.json
+[INFO|configuration_utils.py:1027] 2026-04-02 04:38:25,400 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "do_sample": true,
+  "eos_token_id": 128001,
+  "temperature": 0.6,
+  "top_p": 0.9
+}
+2026-04-02 04:38:25 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/config.json "HTTP/1.1 200 OK"
+
+[INFO|configuration_utils.py:757] 2026-04-02 04:38:25,639 >> loading configuration file config.json from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/config.json
+[INFO|configuration_utils.py:824] 2026-04-02 04:38:25,642 >> Model config LlamaConfig {
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 128000,
+  "dtype": "bfloat16",
+  "eos_token_id": 128001,
+  "head_dim": 64,
+  "hidden_act": "silu",
+  "hidden_size": 2048,
+  "initializer_range": 0.02,
+  "intermediate_size": 8192,
+  "max_position_embeddings": 131072,
+  "mlp_bias": false,
+  "model_type": "llama",
+  "num_attention_heads": 32,
+  "num_hidden_layers": 16,
+  "num_key_value_heads": 8,
+  "pad_token_id": null,
+  "pretraining_tp": 1,
+  "rms_norm_eps": 1e-05,
+  "rope_parameters": {
+    "factor": 32.0,
+    "high_freq_factor": 4.0,
+    "low_freq_factor": 1.0,
+    "original_max_position_embeddings": 8192,
+    "rope_theta": 500000.0,
+    "rope_type": "llama3"
+  },
+  "tie_word_embeddings": true,
+  "transformers_version": "5.4.0",
+  "use_cache": true,
+  "vocab_size": 128256
+}
+2026-04-02 04:38:25 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/config.json "HTTP/1.1 200 OK"
+
+[INFO|modeling_utils.py:709] 2026-04-02 04:38:25,875 >> loading weights file model.safetensors from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/model.safetensors
+[INFO|modeling_utils.py:779] 2026-04-02 04:38:25,875 >> Will use dtype=torch.bfloat16 as defined in model's config object
+[INFO|modeling_utils.py:3608] 2026-04-02 04:38:25,875 >> Detected DeepSpeed ZeRO-3: activating zero.init() for this model
+[INFO|configuration_utils.py:1027] 2026-04-02 04:38:25,892 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "eos_token_id": 128001,
+  "output_attentions": false,
+  "output_hidden_states": false,
+  "use_cache": true
+}
+[2026-04-02 04:38:26,886] [INFO] [partition_parameters.py:345:__exit__] finished initializing model - num_params = 294, num_elems = 3.00B
+2026-04-02 04:38:27 - INFO - httpx - HTTP Request: HEAD https://huggingface.co/meta-llama/Llama-3.2-1B/resolve/main/generation_config.json "HTTP/1.1 200 OK"
+
+[INFO|configuration_utils.py:980] 2026-04-02 04:38:27,925 >> loading configuration file generation_config.json from cache at /mnt/datpv/.cache/huggingface/hub/models--meta-llama--Llama-3.2-1B/snapshots/4e20de362430cd3b72f300e6b0f18e50e7166e08/generation_config.json
+[INFO|configuration_utils.py:1027] 2026-04-02 04:38:27,925 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "do_sample": true,
+  "eos_token_id": 128001,
+  "temperature": 0.6,
+  "top_p": 0.9
+}
+
+Traceback (most recent call last):
+  File "/mnt/datpv/riskKD/scripts/run_distill_dpo.py", line 2908, in <module>
+    main()
+  File "/mnt/datpv/riskKD/scripts/run_distill_dpo.py", line 2838, in main
+    trainer = DistillTrainer(
+  File "/mnt/datpv/riskKD/scripts/run_distill_dpo.py", line 890, in __init__
+    super().__init__(
+  File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/site-packages/transformers/trainer.py", line 570, in __init__
+    os.makedirs(self.args.output_dir, exist_ok=True)
+  File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 225, in makedirs
+    mkdir(name, mode)
+PermissionError: [Errno 13] Permission denied: '/home/minchan.kwon'
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/mnt/datpv/riskKD/scripts/run_distill_dpo.py", line 2908, in <module>
+[rank0]:     main()
+[rank0]:   File "/mnt/datpv/riskKD/scripts/run_distill_dpo.py", line 2838, in main
+[rank0]:     trainer = DistillTrainer(
+[rank0]:   File "/mnt/datpv/riskKD/scripts/run_distill_dpo.py", line 890, in __init__
+[rank0]:     super().__init__(
+[rank0]:   File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/site-packages/transformers/trainer.py", line 570, in __init__
+[rank0]:     os.makedirs(self.args.output_dir, exist_ok=True)
+[rank0]:   File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 215, in makedirs
+[rank0]:     makedirs(head, exist_ok=exist_ok)
+[rank0]:   File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 215, in makedirs
+[rank0]:     makedirs(head, exist_ok=exist_ok)
+[rank0]:   File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 215, in makedirs
+[rank0]:     makedirs(head, exist_ok=exist_ok)
+[rank0]:   File "/mnt/datpv/miniconda3/envs/tvkd/lib/python3.10/os.py", line 225, in makedirs
+[rank0]:     mkdir(name, mode)
+[rank0]: PermissionError: [Errno 13] Permission denied: '/home/minchan.kwon'

@@ -9,7 +9,6 @@ dataset_mixer:
 dataset_splits:
 - train
 preprocessing_num_workers: 12
-overwrite_output_dir: false
 
 # DPOTrainer arguments
 bf16: true

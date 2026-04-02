@@ -1,0 +1,98 @@
+_wandb:
+    value:
+        cli_version: 0.25.1
+        e:
+            lb20yutuwyj32m793dcfxuub5op3otg0:
+                args:
+                    - recipes/llama3.2-1b-deita-dpomix/riskKD.yaml
+                codePath: scripts/run_distill_dpo.py
+                codePathLocal: scripts/run_distill_dpo.py
+                cpu_count: 52
+                cpu_count_logical: 52
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "31591473152"
+                        used: "23707676672"
+                email: phivandat2005@gmail.com
+                executable: /mnt/datpv/miniconda3/envs/tvkd/bin/python
+                git:
+                    commit: 2ef2b7dd9ce632806b158fe7c54be38adccd205d
+                    remote: https://github.com/PhiVanDat123/riskKD.git
+                gpu: NVIDIA A40
+                gpu_count: 2
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 10752
+                      memoryTotal: "48305799168"
+                      name: NVIDIA A40
+                      uuid: GPU-3dac019c-7311-8c07-a508-6a39b592e0c4
+                    - architecture: Ampere
+                      cudaCores: 10752
+                      memoryTotal: "48305799168"
+                      name: NVIDIA A40
+                      uuid: GPU-2166eb19-46f6-775f-07bd-58cbacb71ebc
+                host: ai-train-a40-1
+                memory:
+                    total: "485865242624"
+                os: Linux-6.8.0-90-generic-x86_64-with-glibc2.39
+                program: /mnt/datpv/riskKD/scripts/run_distill_dpo.py
+                python: CPython 3.10.20
+                root: /mnt/datpv/riskKD
+                startedAt: "2026-04-02T04:38:16.792994Z"
+                writerId: lb20yutuwyj32m793dcfxuub5op3otg0
+        m: []
+        python_version: 3.10.20
+        t:
+            "1":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 51
+                - 71
+                - 84
+                - 98
+                - 105
+            "2":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 51
+                - 71
+                - 84
+                - 98
+                - 105
+            "3":
+                - 13
+                - 16
+            "4": 3.10.20
+            "5": 0.25.1
+            "6": 5.4.0
+            "12": 0.25.1
+            "13": linux-x86_64
+adpa_loss_type:
+    value: reverse_ce
+adpa_weight:
+    value: 0
+beta:
+    value: 0.1
+distillation_weight:
+    value: 0
+dpo_weight:
+    value: 1e-05
+if_radpo2:
+    value: false
+learning_rate:
+    value: 5e-07
+loss_type:
+    value: sigmoid
+model:
+    value: meta-llama/Llama-3.2-1B
+radpo_confidence_level:
+    value: 0.99
+radpo_weight:
+    value: 1
+sft_on_chosen:
+    value: 0
