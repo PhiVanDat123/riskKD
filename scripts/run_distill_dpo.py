@@ -2825,8 +2825,12 @@ def main():
         )
         model_kwargs = None
 
-    ref_model = model
-    ref_model_kwargs = model_kwargs
+    if model_args.ref_model_name_or_path is not None:
+        ref_model = AutoModelForCausalLM.from_pretrained(model_args.ref_model_name_or_path, **model_kwargs)
+        ref_model_kwargs = None
+    else:
+        ref_model = model
+        ref_model_kwargs = model_kwargs
 
     if model_args.use_peft is True:
         ref_model = None

@@ -122,6 +122,14 @@ class ModelArguments:
             )
         },
     )
+    ref_model_name_or_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "The model checkpoint to use as the reference model. If not set, defaults to a frozen copy of model_name_or_path."
+            )
+        },
+    )
     model_revision: str = field(
         default="main",
         metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},

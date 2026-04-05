@@ -1,6 +1,7 @@
 # riskKD: TVKD + Ra-DPO loss
 # Model arguments
 model_name_or_path: meta-llama/Llama-3.2-1B
+ref_model_name_or_path: model/teacher_dpo
 torch_dtype: bfloat16
 
 # Data training arguments
