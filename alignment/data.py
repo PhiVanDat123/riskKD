@@ -72,30 +72,65 @@ def apply_chat_template(
             )
     elif task in ["dpo", "orpo"]:
         if all(k in example.keys() for k in ("chosen", "rejected")):
-            if not is_openai_format(example["chosen"]) or not is_openai_format(example["rejected"]):
-                raise ValueError(
-                    f"Could not format example as dialogue for `{task}` task! Require OpenAI format for all messages"
-                )
+            chosen_field = example["chosen"]
+            rejected_field = example["rejected"]
 
-            # For DPO/ORPO, the inputs are triples of (prompt, chosen, rejected), where `chosen` and `rejected` are the final turn of a dialogue
-            # We therefore need to extract the N-1 turns to form the prompt
-            if "prompt" in example and is_openai_format(example["prompt"]):
-                prompt_messages = example["prompt"]
-                chosen_messages = example["chosen"]
-                rejected_messages = example["rejected"]
+            # Support both OpenAI-style lists of message dicts and simple string responses
+            if is_openai_format(chosen_field) and is_openai_format(rejected_field):
+                # For DPO/ORPO, the inputs are triples of (prompt, chosen, rejected), where `chosen` and `rejected` are the final turn of a dialogue
+                # We therefore need to extract the N-1 turns to form the prompt
+                if "prompt" in example and is_openai_format(example.get("prompt", None)):
+                    prompt_messages = example["prompt"]
+                    chosen_messages = chosen_field
+                    rejected_messages = rejected_field
+                else:
+                    prompt_messages = chosen_field[:-1]
+                    # Now we extract the final turn to define chosen/rejected responses
+                    chosen_messages = chosen_field[-1:]
+                    rejected_messages = rejected_field[-1:]
             else:
-                prompt_messages = example["chosen"][:-1]
-                # Now we extract the final turn to define chosen/rejected responses
-                chosen_messages = example["chosen"][-1:]
-                rejected_messages = example["rejected"][-1:]
+                # Assume `chosen`/`rejected` are plain strings; build OpenAI-style messages
+                prompt_field = example.get("prompt", None)
+                if isinstance(prompt_field, list) and is_openai_format(prompt_field):
+                    prompt_messages = prompt_field
+                elif isinstance(prompt_field, str):
+                    prompt_messages = [{"role": "user", "content": prompt_field}]
+                else:
+                    # fallback: use empty prompt
+                    prompt_messages = [{"role": "user", "content": ""}]
+
+                chosen_messages = (
+                    [{"role": "assistant", "content": chosen_field}]
+                    if isinstance(chosen_field, str)
+                    else chosen_field
+                )
+                rejected_messages = (
+                    [{"role": "assistant", "content": rejected_field}]
+                    if isinstance(rejected_field, str)
+                    else rejected_field
+                )
 
             # Prepend a system message if the first message is not a system message
             if auto_insert_empty_system_msg:
                 maybe_insert_system_message(prompt_messages, tokenizer)
 
-            example["text_prompt"] = tokenizer.apply_chat_template(prompt_messages, tokenize=False)
-            example["text_chosen"] = tokenizer.apply_chat_template(chosen_messages, tokenize=False, add_special_tokens=False)
-            example["text_rejected"] = tokenizer.apply_chat_template(rejected_messages, tokenize=False, add_special_tokens=False)
+            # Build combined messages (match thangchoDat behavior)
+            chosen_message = prompt_messages + chosen_messages
+            rejected_message = prompt_messages + rejected_messages
+
+            chosen_template_message = tokenizer.apply_chat_template(
+                chosen_message, tokenize=False, add_generation_prompt=False
+            )
+            rejected_template_message = tokenizer.apply_chat_template(
+                rejected_message, tokenize=False, add_generation_prompt=False
+            )
+            prompt_template_message = tokenizer.apply_chat_template(
+                prompt_messages, tokenize=False, add_generation_prompt=False
+            )
+
+            example["text_prompt"] = prompt_template_message
+            example["text_chosen"] = chosen_template_message
+            example["text_rejected"] = rejected_template_message
         else:
             raise ValueError(
                 f"Could not format example as dialogue for `{task}` task! Require either the "
