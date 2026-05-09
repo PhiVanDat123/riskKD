@@ -25,17 +25,17 @@ gradient_accumulation_steps: 1
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: false
-learning_rate: 2.0e-05
+learning_rate: 3.0e-05
 log_level: info
 logging_steps: 5
 logging_strategy: steps
 lr_scheduler_type: cosine
 max_seq_length: 2048
 max_steps: -1
-num_train_epochs: 6
-output_dir: /media/volume/h100_volumne3/Muon_optimizer/riskKD/models/stu_sft
+num_train_epochs: 3
+output_dir: /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/student_sft_init
 per_device_eval_batch_size: 16
-per_device_train_batch_size: 16
+per_device_train_batch_size: 32
 push_to_hub: false
 remove_unused_columns: true
 report_to: none

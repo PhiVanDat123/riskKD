@@ -1,0 +1,811 @@
+INFO:root:Using nproc_per_node=8.
+W0508 23:16:53.166000 9194 .venv/lib/python3.12/site-packages/torch/distributed/run.py:793] 
+W0508 23:16:53.166000 9194 .venv/lib/python3.12/site-packages/torch/distributed/run.py:793] *****************************************
+W0508 23:16:53.166000 9194 .venv/lib/python3.12/site-packages/torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0508 23:16:53.166000 9194 .venv/lib/python3.12/site-packages/torch/distributed/run.py:793] *****************************************
+2026-05-08 23:17:14 - INFO - __main__ - Model parameters ModelArguments(base_model_revision=None, model_name_or_path='/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher', ref_model_name_or_path=None, model_revision='main', model_code_revision=None, torch_dtype='bfloat16', tokenizer_name_or_path=None, trust_remote_code=False, use_flash_attention_2=False, use_peft=False, lora_r=16, lora_alpha=32, lora_dropout=0.05, lora_target_modules=None, lora_modules_to_save=None, load_in_8bit=False, load_in_4bit=False, bnb_4bit_quant_type='nf4', use_bnb_nested_quant=False, bnb_4bit_quant_storage='uint8')
+2026-05-08 23:17:14 - INFO - __main__ - Data parameters DataArguments(chat_template=None, dataset_mixer={'argilla/dpo-mix-7k': 1.0}, text_column='text', dataset_splits=['train'], dataset_configs=None, preprocessing_num_workers=12, truncation_side=None, auto_insert_empty_system_msg=True)
+2026-05-08 23:17:14 - INFO - __main__ - Training/evaluation parameters CustomDPOConfig(
+_n_gpu=1,
+accelerator_config={'split_batches': False, 'dispatch_batches': None, 'even_batches': True, 'use_seedable_sampler': True, 'non_blocking': False, 'gradient_accumulation_kwargs': None, 'use_configured_state': False},
+adafactor=False,
+adam_beta1=0.9,
+adam_beta2=0.999,
+adam_epsilon=1e-08,
+adaptive_teacher_margin=False,
+adpa_importance_sampling=False,
+adpa_loss_type=reverse_ce,
+adpa_temperature=1.0,
+adpa_weight=0,
+auto_find_batch_size=False,
+average_tokens_across_devices=False,
+batch_eval_metrics=False,
+beta=0.01,
+bf16=True,
+bf16_full_eval=False,
+chosen_distil_weight=0,
+data_seed=None,
+dataloader_drop_last=False,
+dataloader_num_workers=0,
+dataloader_persistent_workers=False,
+dataloader_pin_memory=True,
+dataloader_prefetch_factor=None,
+dataset_num_proc=64,
+ddp_backend=None,
+ddp_broadcast_buffers=None,
+ddp_bucket_cap_mb=None,
+ddp_find_unused_parameters=None,
+ddp_timeout=1800,
+debug=[],
+deepspeed=None,
+disable_dropout=True,
+disable_tqdm=False,
+discopop_tau=0.05,
+dispatch_batches=None,
+distillation_weight=0,
+do_eval=False,
+do_predict=False,
+do_train=False,
+dpkd_distil_weight=0,
+dpo_length_normalization=False,
+dpo_weight=1,
+eval_accumulation_steps=None,
+eval_delay=0,
+eval_do_concat_batches=True,
+eval_on_start=False,
+eval_steps=None,
+eval_strategy=IntervalStrategy.NO,
+eval_use_gather_object=False,
+evaluation_strategy=None,
+f_alpha_divergence_coef=1.0,
+f_divergence_type=FDivergenceType.REVERSE_KL,
+force_use_ref_model=False,
+fp16=False,
+fp16_backend=auto,
+fp16_full_eval=False,
+fp16_opt_level=O1,
+fsdp=[],
+fsdp_config={'min_num_params': 0, 'xla': False, 'xla_fsdp_v2': False, 'xla_fsdp_grad_ckpt': False},
+fsdp_min_num_params=0,
+fsdp_transformer_layer_cls_to_wrap=None,
+full_determinism=False,
+generate_during_eval=False,
+gradient_accumulation_steps=16,
+gradient_checkpointing=True,
+gradient_checkpointing_kwargs={'use_reentrant': False},
+greater_is_better=None,
+group_by_length=False,
+half_precision_backend=auto,
+hub_always_push=False,
+hub_model_id=None,
+hub_model_revision=main,
+hub_private_repo=None,
+hub_strategy=HubStrategy.EVERY_SAVE,
+hub_token=<HUB_TOKEN>,
+if_radpo2=False,
+ignore_data_skip=False,
+include_for_metrics=[],
+include_inputs_for_metrics=False,
+include_num_input_tokens_seen=False,
+include_tokens_per_second=False,
+is_cal_risk_distribution_logps=False,
+is_encoder_decoder=None,
+is_split_risk_ratio=True,
+jit_mode_eval=False,
+kl_penalty_weight=0,
+kl_student_target=rejected,
+kl_student_weight=0.0,
+label_names=None,
+label_pad_token_id=-100,
+label_smoothing=0.0,
+label_smoothing_factor=0.0,
+learning_rate=5e-07,
+length_column_name=length,
+load_best_model_at_end=False,
+local_rank=0,
+log_level=info,
+log_level_replica=warning,
+log_on_each_node=True,
+logging_dir=/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/runs/May08_23-17-07_142f23d8ef68,
+logging_first_step=True,
+logging_nan_inf_filter=True,
+logging_steps=1,
+logging_strategy=IntervalStrategy.STEPS,
+loss_type=sigmoid,
+lr_scheduler_kwargs={},
+lr_scheduler_type=SchedulerType.COSINE,
+max_grad_norm=1.0,
+max_length=2048,
+max_prompt_length=1800,
+max_rejected_length=None,
+max_steps=-1,
+metric_for_best_model=None,
+model_adapter_name=None,
+model_init_kwargs=None,
+mp_parameters=,
+neftune_noise_alpha=None,
+new_tpkd_weight=0.0,
+no_cuda=False,
+num_train_epochs=1,
+optim=OptimizerNames.ADAMW_TORCH,
+optim_args=None,
+optim_target_modules=None,
+output_dir=/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher,
+overwrite_output_dir=False,
+padding_value=None,
+past_index=-1,
+per_device_eval_batch_size=8,
+per_device_train_batch_size=1,
+precompute_ref_log_probs=False,
+prediction_loss_only=False,
+push_to_hub=False,
+push_to_hub_model_id=None,
+push_to_hub_organization=None,
+push_to_hub_token=<PUSH_TO_HUB_TOKEN>,
+qadapter_alpha=1.0,
+qadapter_alpha_1=1.0,
+qadapter_alpha_tilde=1.0,
+qadapter_distil_weight=0,
+qadapter_gamma=1.0,
+qadapter_loss_type=dpo,
+qadapter_reward_normalization=False,
+qadapter_softvalue_type=sum,
+qadapter_with_ref=False,
+radpo_alpha=0.5,
+radpo_confidence_level=0.5,
+radpo_weight=0,
+ray_scope=last,
+ref_adapter_name=None,
+ref_model_init_kwargs=None,
+ref_model_mixup_alpha=0.9,
+ref_model_sync_steps=64,
+reference_free=False,
+rejected_distil_weight=0,
+remove_unused_columns=False,
+report_to=[],
+restore_callback_states_from_checkpoint=False,
+resume_from_checkpoint=None,
+rpo_alpha=None,
+run_name=/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher,
+save_on_each_node=False,
+save_only_model=True,
+save_safetensors=True,
+save_steps=100,
+save_strategy=SaveStrategy.STEPS,
+save_total_limit=None,
+seed=42,
+sequence_kd_weight=0,
+sft_on_chosen=0,
+sft_on_rejected=0,
+simpo_gamma=0,
+skip_memory_metrics=True,
+split_batches=None,
+sum_dpo_weight=0.0,
+sync_ref_model=False,
+tf32=None,
+torch_compile=False,
+torch_compile_backend=None,
+torch_compile_mode=None,
+torch_empty_cache_steps=None,
+torchdynamo=None,
+tpkd_alpha=1.0,
+tpkd_beta=1.0,
+tpkd_gamma=0.7,
+tpkd_temperature_beta=1.0,
+tpu_metrics_debug=False,
+tpu_num_cores=None,
+truncation_mode=keep_end,
+use_cpu=False,
+use_flash_attention=True,
+use_ipex=False,
+use_legacy_prediction_loop=False,
+use_liger_kernel=False,
+use_mps_device=False,
+use_num_logits_to_keep=False,
+use_weighting=False,
+warmup_ratio=0.1,
+warmup_steps=0,
+weight_decay=0.0,
+)
+Generating train split:   0%|          | 0/6750 [00:00<?, ? examples/s]Generating train split:  15%|█▍        | 1000/6750 [00:00<00:00, 7937.23 examples/s]Generating train split: 100%|██████████| 6750/6750 [00:00<00:00, 30597.76 examples/s]
+Generating test split:   0%|          | 0/750 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 750/750 [00:00<00:00, 26502.62 examples/s]
+2026-05-08 23:17:20 - INFO - __main__ - Training on the following splits: ['train : 6750']
+[INFO|tokenization_utils_base.py:2048] 2026-05-08 23:17:20,667 >> loading file tokenizer.json
+[INFO|tokenization_utils_base.py:2048] 2026-05-08 23:17:20,667 >> loading file tokenizer.model
+[INFO|tokenization_utils_base.py:2048] 2026-05-08 23:17:20,668 >> loading file added_tokens.json
+[INFO|tokenization_utils_base.py:2048] 2026-05-08 23:17:20,668 >> loading file special_tokens_map.json
+[INFO|tokenization_utils_base.py:2048] 2026-05-08 23:17:20,668 >> loading file tokenizer_config.json
+[INFO|tokenization_utils_base.py:2048] 2026-05-08 23:17:20,668 >> loading file chat_template.jinja
+Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s][INFO|tokenization_utils_base.py:2313] 2026-05-08 23:17:21,229 >> Special tokens have been added in the vocabulary, make sure the associated word embeddings are fine-tuned or trained.
+Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   0%|          | 0/6750 [00:00<?, ? examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 205/6750 [00:01<00:39, 164.16 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 224/6750 [00:01<00:34, 188.97 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 217/6750 [00:01<00:36, 180.49 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 205/6750 [00:01<00:39, 164.95 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 213/6750 [00:01<00:38, 169.47 examples/s]Formatting comparisons with prompt template (num_proc=12):  12%|█▏        | 782/6750 [00:01<00:09, 641.25 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 190/6750 [00:01<00:46, 140.28 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 216/6750 [00:01<00:41, 155.67 examples/s]Formatting comparisons with prompt template (num_proc=12):   3%|▎         | 225/6750 [00:01<00:39, 165.33 examples/s]Formatting comparisons with prompt template (num_proc=12):   7%|▋         | 473/6750 [00:01<00:16, 388.16 examples/s]Formatting comparisons with prompt template (num_proc=12):   7%|▋         | 456/6750 [00:01<00:16, 372.60 examples/s]Formatting comparisons with prompt template (num_proc=12):   7%|▋         | 446/6750 [00:01<00:18, 345.26 examples/s]Formatting comparisons with prompt template (num_proc=12):   8%|▊         | 563/6750 [00:01<00:13, 446.93 examples/s]Formatting comparisons with prompt template (num_proc=12):  20%|██        | 1352/6750 [00:01<00:05, 1039.82 examples/s]Formatting comparisons with prompt template (num_proc=12):  13%|█▎        | 880/6750 [00:01<00:08, 686.41 examples/s]Formatting comparisons with prompt template (num_proc=12):  12%|█▏        | 791/6750 [00:01<00:09, 610.46 examples/s]Formatting comparisons with prompt template (num_proc=12):  12%|█▏        | 783/6750 [00:01<00:10, 584.65 examples/s]Formatting comparisons with prompt template (num_proc=12):  17%|█▋        | 1126/6750 [00:01<00:05, 951.79 examples/s]Formatting comparisons with prompt template (num_proc=12):  13%|█▎        | 844/6750 [00:01<00:08, 658.98 examples/s]Formatting comparisons with prompt template (num_proc=12):  17%|█▋        | 1126/6750 [00:01<00:06, 914.11 examples/s]Formatting comparisons with prompt template (num_proc=12):  28%|██▊       | 1913/6750 [00:01<00:03, 1425.92 examples/s]Formatting comparisons with prompt template (num_proc=12):  17%|█▋        | 1126/6750 [00:01<00:06, 876.13 examples/s]Formatting comparisons with prompt template (num_proc=12):  20%|██        | 1352/6750 [00:01<00:05, 978.36 examples/s]Formatting comparisons with prompt template (num_proc=12):  21%|██▏       | 1444/6750 [00:01<00:04, 1074.98 examples/s]Formatting comparisons with prompt template (num_proc=12):  20%|██        | 1355/6750 [00:01<00:05, 1003.06 examples/s]Formatting comparisons with prompt template (num_proc=12):  24%|██▍       | 1609/6750 [00:01<00:04, 1175.65 examples/s]Formatting comparisons with prompt template (num_proc=12):  24%|██▎       | 1594/6750 [00:01<00:04, 1247.38 examples/s]Formatting comparisons with prompt template (num_proc=12):  23%|██▎       | 1584/6750 [00:02<00:04, 1141.44 examples/s]Formatting comparisons with prompt template (num_proc=12):  37%|███▋      | 2473/6750 [00:02<00:02, 1641.08 examples/s]Formatting comparisons with prompt template (num_proc=12):  21%|██▏       | 1444/6750 [00:02<00:05, 966.39 examples/s]Formatting comparisons with prompt template (num_proc=12):  32%|███▏      | 2163/6750 [00:02<00:02, 1542.56 examples/s]Formatting comparisons with prompt template (num_proc=12):  28%|██▊       | 1861/6750 [00:02<00:03, 1231.66 examples/s]Formatting comparisons with prompt template (num_proc=12):  28%|██▊       | 1907/6750 [00:02<00:03, 1333.27 examples/s]Formatting comparisons with prompt template (num_proc=12):  32%|███▏      | 2166/6750 [00:02<00:03, 1454.42 examples/s]Formatting comparisons with prompt template (num_proc=12):  37%|███▋      | 2469/6750 [00:02<00:02, 1814.59 examples/s]Formatting comparisons with prompt template (num_proc=12):  33%|███▎      | 2252/6750 [00:02<00:02, 1534.08 examples/s]Formatting comparisons with prompt template (num_proc=12):  33%|███▎      | 2246/6750 [00:02<00:03, 1373.76 examples/s]Formatting comparisons with prompt template (num_proc=12):  40%|████      | 2701/6750 [00:02<00:02, 1833.78 examples/s]Formatting comparisons with prompt template (num_proc=12):  38%|███▊      | 2567/6750 [00:02<00:02, 1552.63 examples/s]Formatting comparisons with prompt template (num_proc=12):  45%|████▍     | 3037/6750 [00:02<00:01, 1948.64 examples/s]Formatting comparisons with prompt template (num_proc=12):  45%|████▌     | 3043/6750 [00:02<00:01, 1890.07 examples/s]Formatting comparisons with prompt template (num_proc=12):  53%|█████▎    | 3593/6750 [00:02<00:01, 1894.64 examples/s]Formatting comparisons with prompt template (num_proc=12):  45%|████▍     | 3037/6750 [00:02<00:01, 1946.11 examples/s]Formatting comparisons with prompt template (num_proc=12):  45%|████▌     | 3040/6750 [00:02<00:02, 1727.05 examples/s]Formatting comparisons with prompt template (num_proc=12):  45%|████▌     | 3045/6750 [00:02<00:01, 1913.47 examples/s]Formatting comparisons with prompt template (num_proc=12):  37%|███▋      | 2473/6750 [00:02<00:03, 1403.48 examples/s]Formatting comparisons with prompt template (num_proc=12):  47%|████▋     | 3202/6750 [00:02<00:01, 1847.71 examples/s]Formatting comparisons with prompt template (num_proc=12):  49%|████▊     | 3289/6750 [00:02<00:01, 1769.64 examples/s]Formatting comparisons with prompt template (num_proc=12):  49%|████▊     | 3280/6750 [00:02<00:02, 1689.96 examples/s]Formatting comparisons with prompt template (num_proc=12):  62%|██████▏   | 4158/6750 [00:02<00:01, 2007.61 examples/s]Formatting comparisons with prompt template (num_proc=12):  53%|█████▎    | 3599/6750 [00:02<00:01, 1994.44 examples/s]Formatting comparisons with prompt template (num_proc=12):  53%|█████▎    | 3601/6750 [00:02<00:01, 2037.29 examples/s]Formatting comparisons with prompt template (num_proc=12):  53%|█████▎    | 3602/6750 [00:02<00:01, 1901.52 examples/s]Formatting comparisons with prompt template (num_proc=12):  57%|█████▋    | 3841/6750 [00:02<00:01, 2061.13 examples/s]Formatting comparisons with prompt template (num_proc=12):  50%|█████     | 3378/6750 [00:02<00:01, 1885.99 examples/s]Formatting comparisons with prompt template (num_proc=12):  58%|█████▊    | 3940/6750 [00:02<00:01, 1995.02 examples/s]Formatting comparisons with prompt template (num_proc=12):  55%|█████▍    | 3689/6750 [00:02<00:01, 1659.60 examples/s]Formatting comparisons with prompt template (num_proc=12):  61%|██████▏   | 4149/6750 [00:02<00:01, 2117.05 examples/s]Formatting comparisons with prompt template (num_proc=12):  65%|██████▌   | 4403/6750 [00:03<00:01, 2318.57 examples/s]Formatting comparisons with prompt template (num_proc=12):  58%|█████▊    | 3923/6750 [00:03<00:01, 1778.35 examples/s]Formatting comparisons with prompt template (num_proc=12):  63%|██████▎   | 4254/6750 [00:03<00:01, 1969.52 examples/s]Formatting comparisons with prompt template (num_proc=12):  58%|█████▊    | 3940/6750 [00:03<00:01, 1954.83 examples/s]Formatting comparisons with prompt template (num_proc=12):  77%|███████▋  | 5205/6750 [00:03<00:00, 2351.50 examples/s]Formatting comparisons with prompt template (num_proc=12):  69%|██████▉   | 4688/6750 [00:03<00:00, 2584.50 examples/s]Formatting comparisons with prompt template (num_proc=12):  75%|███████▌  | 5064/6750 [00:03<00:00, 2877.79 examples/s]Formatting comparisons with prompt template (num_proc=12):  68%|██████▊   | 4606/6750 [00:03<00:00, 2166.89 examples/s]Formatting comparisons with prompt template (num_proc=12):  65%|██████▌   | 4420/6750 [00:03<00:01, 1949.45 examples/s]Formatting comparisons with prompt template (num_proc=12):  75%|███████▍  | 5060/6750 [00:03<00:00, 2780.38 examples/s]Formatting comparisons with prompt template (num_proc=12):  83%|████████▎ | 5626/6750 [00:03<00:00, 2413.65 examples/s]Formatting comparisons with prompt template (num_proc=12):  65%|██████▌   | 4401/6750 [00:03<00:01, 1954.22 examples/s]Formatting comparisons with prompt template (num_proc=12):  75%|███████▌  | 5064/6750 [00:03<00:00, 2489.32 examples/s]Formatting comparisons with prompt template (num_proc=12):  65%|██████▍   | 4380/6750 [00:03<00:01, 1794.74 examples/s]Formatting comparisons with prompt template (num_proc=12):  75%|███████▌  | 5064/6750 [00:03<00:00, 2514.80 examples/s]Formatting comparisons with prompt template (num_proc=12):  67%|██████▋   | 4502/6750 [00:03<00:01, 2017.40 examples/s]Formatting comparisons with prompt template (num_proc=12):  90%|█████████ | 6106/6750 [00:03<00:00, 2612.43 examples/s]Formatting comparisons with prompt template (num_proc=12):  82%|████████▏ | 5558/6750 [00:03<00:00, 2850.50 examples/s]Formatting comparisons with prompt template (num_proc=12):  82%|████████▏ | 5534/6750 [00:03<00:00, 2670.28 examples/s]Formatting comparisons with prompt template (num_proc=12):  82%|████████▏ | 5527/6750 [00:03<00:00, 2417.37 examples/s]Formatting comparisons with prompt template (num_proc=12):  73%|███████▎  | 4950/6750 [00:03<00:00, 2322.91 examples/s]Formatting comparisons with prompt template (num_proc=12):  78%|███████▊  | 5293/6750 [00:03<00:00, 2516.99 examples/s]Formatting comparisons with prompt template (num_proc=12):  82%|████████▏ | 5551/6750 [00:03<00:00, 2585.06 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▍| 6412/6750 [00:03<00:00, 2574.34 examples/s]Formatting comparisons with prompt template (num_proc=12):  78%|███████▊  | 5296/6750 [00:03<00:00, 2357.57 examples/s]Formatting comparisons with prompt template (num_proc=12):  87%|████████▋ | 5857/6750 [00:03<00:00, 2483.85 examples/s]Formatting comparisons with prompt template (num_proc=12):  83%|████████▎ | 5626/6750 [00:03<00:00, 2505.09 examples/s]Formatting comparisons with prompt template (num_proc=12):  78%|███████▊  | 5296/6750 [00:03<00:00, 2267.17 examples/s]Formatting comparisons with prompt template (num_proc=12):  91%|█████████ | 6115/6750 [00:03<00:00, 2777.03 examples/s]Formatting comparisons with prompt template (num_proc=12):  89%|████████▉ | 6001/6750 [00:03<00:00, 2454.72 examples/s]Formatting comparisons with prompt template (num_proc=12):  87%|████████▋ | 5862/6750 [00:03<00:00, 2343.42 examples/s]Formatting comparisons with prompt template (num_proc=12):  90%|████████▉ | 6044/6750 [00:03<00:00, 2839.24 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▍| 6412/6750 [00:03<00:00, 2521.28 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▌| 6413/6750 [00:03<00:00, 2700.25 examples/s]Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:03<00:00, 1697.17 examples/s]
+Formatting comparisons with prompt template (num_proc=12):  90%|█████████ | 6099/6750 [00:03<00:00, 2506.15 examples/s]Formatting comparisons with prompt template (num_proc=12):  87%|████████▋ | 5859/6750 [00:03<00:00, 2340.99 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▌| 6440/6750 [00:03<00:00, 2256.73 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▌| 6418/6750 [00:03<00:00, 2270.63 examples/s]Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:03<00:00, 2393.58 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▌| 6413/6750 [00:03<00:00, 2354.90 examples/s]Formatting comparisons with prompt template (num_proc=12):  95%|█████████▍| 6383/6750 [00:04<00:00, 2106.82 examples/s]Formatting comparisons with prompt template (num_proc=12):  94%|█████████▍| 6349/6750 [00:04<00:00, 2286.92 examples/s]Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1659.61 examples/s]
+Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1636.92 examples/s]
+Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 2158.57 examples/s]Formatting comparisons with prompt template (num_proc=12): 100%|█████████▉| 6734/6750 [00:04<00:00, 2354.37 examples/s]Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1592.08 examples/s]
+Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1562.53 examples/s]
+Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1566.08 examples/s]
+Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1515.76 examples/s]
+Formatting comparisons with prompt template (num_proc=12): 100%|██████████| 6750/6750 [00:04<00:00, 1522.69 examples/s]
+2026-05-08 23:17:25 - INFO - __main__ - Prompt sample 5238 of the raw training set:
+
+<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+
+Identify five different types of caves found around the world and provide a brief explanation for each.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+1. Limestone caves: These are the most common type of caves and are formed through the dissolution of soluble rocks like limestone, dolomite, and gypsum. Over time, water containing dissolved carbon dioxide seeps into the cracks and crevices in these rocks, dissolving them and creating cavities that eventually form a cave system. Famous examples include Mammoth Cave in Kentucky, USA, and Carlsbad Caverns in New Mexico, USA.
+
+2. Lava tubes: These caves are formed during volcanic eruptions when lava flows downhill from a volcano and cools on the surface while still remaining hot and flowing underneath. As the lava drains away, it leaves behind an empty tube-like structure known as a lava tube. Examples of lava tube caves can be found in Hawaii Volcanoes National Park, USA, and Jeju Island, South Korea.
+
+3. Sea caves: Also known as littoral caves, sea caves are formed by the erosive action of waves along coastal cliffs made of softer rock types. The constant pounding of waves against the cliff face causes cracks to widen and deepen over time, eventually forming a cave. Sea caves can be found around the world, including the famous Painted Cave on Santa Cruz Island, California, USA, and the Blue Grotto in Capri, Italy.
+
+4. Ice caves: These caves are formed within glaciers or ice formations due to melting and refreezing processes. Meltwater creates channels and cavities within the ice, which can grow larger over time. Some ice caves are seasonal, disappearing when temperatures rise, while others are more permanent features within glaciers. Notable ice caves include Eisriesenwelt in Austria and Vatnajokull Glacier in Iceland.
+
+5. Solutional caves: Similar to limestone caves, solutional caves are formed by the dissolution of soluble rocks, but they typically occur in areas with different geological conditions, such as in salt or quartzite formations. These caves are less common than limestone caves and can be found in locations like the Detroit Salt Mine in Michigan, USA, and the Nacimiento del Río Mundo cave in Spain.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Discuss the geological processes and conditions that lead to the formation of each type of cave you've mentioned, and explain how these processes differ from one another.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+1. Limestone caves: These caves are formed through a process known as karstification, which involves the dissolution of soluble rocks, primarily limestone. Rainwater absorbs carbon dioxide from the atmosphere and soil, forming a weak carbonic acid. This acid seeps into the ground and reacts with the calcium carbonate in limestone, dissolving it. Over thousands to millions of years, this process can create extensive cave systems. 
+
+2. Lava tubes: These caves are created through volcanic activity. During a volcanic eruption, lava flows downhill and cools on the surface, forming a hard crust. However, underneath this crust, the lava remains hot and continues to flow. Once the eruption ceases, the remaining lava drains out, leaving behind a hollow tube. This process is quite different from karstification, as it involves the solidification of molten rock rather than the dissolution of solid rock.
+
+3. Sea caves: The formation of sea caves involves the mechanical and chemical erosion of coastal cliffs by seawater. Waves crashing against the cliff face cause mechanical erosion, while the salt in seawater can cause chemical weathering. Over time, these processes can carve out caves in the cliff. This is a different process from both karstification and the formation of lava tubes, as it involves the direct action of water on rock rather than the dissolution or solidification of rock.
+
+4. Ice caves: These caves are formed within glaciers or ice formations due to the action of meltwater. As the ice melts, water flows along the path of least resistance, creating channels and cavities. These can grow larger over time due to further melting and the action of wind. This process is unique in that it involves the melting and refreezing of ice rather than the dissolution or erosion of rock.
+
+5. Solutional caves: These caves are formed in a similar way to limestone caves, through the dissolution of soluble rocks. However, the types of rock involved are different, such as salt or quartzite. The dissolution process involves water, but instead of carbonic acid, other types of acid may be involved, depending on the type of rock. For example, sulfuric acid can dissolve gypsum to form caves. This process is similar to karstification but differs in the types of rock and acid involved.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Explain the role of sulfuric acid in the formation of solutional caves in gypsum formations.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+In gypsum formations, solutional caves can be formed through the action of sulfuric acid. This process, known as speleogenesis, involves the interaction of water with the mineral anhydrite, which is often found in association with gypsum.
+
+Anhydrite (CaSO4) is relatively insoluble in water. However, when it comes into contact with water, it can slowly transform into gypsum (CaSO4·2H2O), which is more soluble. This transformation process can create micro-cracks in the rock, allowing more water to penetrate and dissolve the gypsum.
+
+Sulfuric acid plays a crucial role in this process. It can be produced by certain types of bacteria that oxidize hydrogen sulfide (H2S) gas, which can be found in oil deposits or hot springs often associated with gypsum formations. The sulfuric acid produced by these bacteria can react with the gypsum to form calcium sulfate, which is highly soluble, and carbon dioxide.
+
+The chemical reaction is as follows:
+
+H2SO4 (sulfuric acid) + CaSO4·2H2O (gypsum) -> CaSO4 (calcium sulfate) + 2H2O (water) + CO2 (carbon dioxide)
+
+This process of dissolution by sulfuric acid can create extensive cave systems in gypsum formations over time. The Lechuguilla Cave in New Mexico, USA, is a famous example of a gypsum cave formed through this process.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Elaborate on the specific types of bacteria involved in the oxidation of hydrogen sulfide gas in the formation of sulfuric acid within gypsum formations.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+
+2026-05-08 23:17:25 - INFO - __main__ - Chosen sample 5238 of the raw training set:
+
+The oxidation of hydrogen sulfide (H2S) to form sulfuric acid (H2SO4) in cave environments is often facilitated by sulfur-oxidizing bacteria. These are chemolithotrophic bacteria, meaning they derive energy from inorganic compounds, in this case, hydrogen sulfide.
+
+Several types of bacteria are known to perform this function, including species from the genera Beggiatoa, Thiobacillus, and Thiothrix. These bacteria are often found in sulfur-rich environments, such as hot springs, hydrothermal vents, and sulfur caves.
+
+Beggiatoa species are known for their ability to oxidize hydrogen sulfide, using it as an energy source to convert carbon dioxide into organic compounds in a process known as chemosynthesis. Thiobacillus species, on the other hand, are known for their role in the sulfur cycle, oxidizing sulfur compounds to sulfate. Thiothrix species also participate in the sulfur cycle and are known for forming filamentous microbial mats in sulfur-rich environments.
+
+These bacteria facilitate the conversion of hydrogen sulfide to sulfuric acid through a series of redox reactions. The sulfuric acid can then react with the gypsum in the cave environment, contributing to the formation and enlargement of caves.<|end_of_text|>
+2026-05-08 23:17:25 - INFO - __main__ - Rejected sample 5238 of the raw training set:
+
+The specific types of bacteria involved in the oxidation of hydrogen sulfide gas (H2S) to produce sulfuric acid (H2SO4) are generally called sulfur-oxidizing bacteria (SOB). These microorganisms oxidize H2S to sulfate (SO4^2-) at different levels of oxidation, producing sulfuric acid as a byproduct. There are two main groups of SOB:
+
+1. Thiomargarita namibiensis: This is a filamentous photosynthetic bacterium that was discovered in the sulfide-rich sediments of the Namibian coastal desert. It was the first bacterium to be identified as responsible for the oxidation of H2S in marine environments. This photosynthetic bacterium utilizes H2S as an electron donor and can fix atmospheric CO2 to produce organic carbon, contributing to the biogeochemical cycle of carbon, sulfur, and nitrogen in these ecosystems.
+
+2. Various Chemoautotrophic bacteria: These include genera such as Beggiatoa, Thiobacillus, and Paracoccus. Chemoautotrophic bacteria are capable of converting inorganic compounds like H2S into organic matter using energy from chemical reactions, rather than from sunlight as in photosynthesis. Some Thiobacillus species, such as T. thiooxidans and T. sulfooxidans, are notably efficient in oxidizing H2S to sulfate.
+
+In the context of gypsum cave formation, these bacteria can contribute to the creation of sulfuric acid, which in turn reacts with gypsum to dissolve it and form caves. The specific type of bacteria present depends on environmental conditions, such as the availability of H2S, oxygen, temperature, and pH. These factors influence the types of microbial communities that can thrive and contribute to the formation of sulfuric acid within gypsum formations.<|end_of_text|>
+2026-05-08 23:17:25 - INFO - __main__ - Prompt sample 912 of the raw training set:
+
+<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+
+In Greek mythology, who was the lesser-known second cousin of the king of the gods?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Greek mythology is comprised of a complex network of gods, demigods, titans, and mythological beings, each with their own distinctive stories and connections. The "king of the gods" in Greek mythology typically refers to Zeus, the god of the sky, lightning, thunder, law, order, and justice.
+
+However, describing a specific figure as the "lesser-known second cousin of Zeus" can be a bit tricky, given the intricate family tree of Greek mythology. It's important to remember that in Greek mythology, families are not as simply defined as in human terms, and relationships are very interconnected due to various liaisons among gods, titans, nymphs, and mortals. 
+
+One such possible character could be Prometheus, a Titan who is identified as a second cousin of Zeus. Prometheus was renowned for his intelligence and as a champion of mankind, and is best known for stealing fire from the gods and giving it to the human race, an act that led to his eternal punishment. Even though Prometheus played a pivotal role in the mythology and was quite influential, he is often overlooked and therefore might be considered "lesser-known" compared to the primary Olympian gods. 
+
+Nevertheless, this designation of "lesser-known second cousin" could vary depending on the interpretation and which particular element of the sprawling Greek mythology family tree one is focusing on.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Explain the significance of Prometheus's act of stealing fire from the gods in Greek mythology.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Prometheus's act of stealing fire from the gods is a pivotal moment in Greek mythology. This act is not just about the literal giving of fire to humans, but it symbolizes a significant shift in the balance of power from the gods to humanity.
+
+Fire, in this context, represents knowledge, enlightenment, and civilization. It was the tool that allowed humans to cook food, forge metal, and essentially advance as a species. By stealing fire from the gods and giving it to humans, Prometheus essentially gave humans the means to progress and evolve, to become more god-like themselves.
+
+This act was also a form of rebellion against the gods, particularly Zeus. It showed Prometheus's sympathy and care for humans, who were struggling and living in darkness without the benefits of fire. His defiance of Zeus's will underscores his role as a trickster and a champion of humanity.
+
+However, this act came with severe consequences. As punishment for his transgression, Zeus had Prometheus chained to a rock where an eagle would eat his liver every day, only for it to regenerate and be eaten again the next day. This punishment was eternal, reflecting the gods' wrath at his audacious act.
+
+In a broader sense, the story of Prometheus can be seen as a cautionary tale about the dangers and costs of defying the gods, or more generally, of challenging authority. It also raises questions about the ethics of disobedience for a greater cause, the struggle for knowledge, and the price of progress.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Can you elaborate on the ethical implications of Prometheus's act of disobedience for a greater cause?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+
+2026-05-08 23:17:25 - INFO - __main__ - Chosen sample 912 of the raw training set:
+
+Certainly, the story of Prometheus can be interpreted as a rich exploration of ethical themes, particularly those related to disobedience, sacrifice, and the greater good.
+
+Prometheus's act of stealing fire from the gods and giving it to humans was a clear act of disobedience against the divine authority, particularly Zeus. However, it was done with the intention of helping humanity, a less powerful and more vulnerable group in the cosmic hierarchy. This presents an ethical dilemma: is it right to disobey authority if it's done to help others?
+
+Prometheus's act can be seen as a form of civil disobedience, a concept that has been a significant part of many social and political movements throughout history. Civil disobedience involves breaking the law or defying authority to bring about change, often for the benefit of a marginalized or disadvantaged group. In this light, Prometheus can be seen as a revolutionary figure, standing up against the gods on behalf of humanity.
+
+On the other hand, his act also resulted in severe personal suffering, as he was punished by Zeus with eternal torment. This introduces the theme of sacrifice for the greater good. Prometheus was willing to endure immense personal pain to bring knowledge and progress to humanity. This raises questions about the ethics of self-sacrifice and the lengths one should go to for the benefit of others.
+
+Furthermore, the story also touches on the concept of "knowledge as power" and who has the right to possess and distribute it. Prometheus's act democratized knowledge, transferring it from the exclusive domain of the gods to the realm of humans. This raises ethical questions about the control and dissemination of knowledge, which are still very relevant in today's information age.
+
+In conclusion, the story of Prometheus offers a rich exploration of ethical themes that continue to resonate today. It invites us to consider the complexities of disobedience, sacrifice, and the distribution of knowledge, and the ethical implications of these actions.<|end_of_text|>
+2026-05-08 23:17:25 - INFO - __main__ - Rejected sample 912 of the raw training set:
+
+Prometheus's act of disobedience in stealing fire from the gods raises several compelling questions regarding ethics, morality, and the pursuit of knowledge or progress. Below are some of the implications from philosophical, religious, and societal perspectives:
+
+1. Ethical Implications: Prometheus's act demonstrated a sense of empathy and care for humanity. He defied the established power structure to offer humans a means of enlightenment, growth and self-sufficiency. Prometheus perceived that the gods held a monopoly on power and resources, withholding such assets from humans, depriving them of opportunities to progress, and living in confinement; it wasn't their fault, their state was solely attributed to their god-given condition. That triggered him into bringing fire, for its reconciliatory and practical benefits to humankind. In other words, Prometheus’s behavior exhibited elements of acting as a benevolent agent in the lives of Humans. One may argue that he tested the boundaries of right and wrong, but looking at the outcome, his actions indeed led to a higher purpose. 2. Moral Implications: However, such an act of defiance defied the standards set forth by Zeus, the ruler of the gods, and violated their beliefs and values. Additionally, the act gave rise to conflict, because the Gods had decreed that fire is their property, and, by taking it away, Prometheus broke that divinely instituted trust and social contract. For Zeus, the cause of justice, a core virtue, was comprised of the gods not being involved in human affairs; mankind was expected to worship them and obey the laws of nature. Prometheus’s act, in that sense, challenged the order advocated by their gods and levels of power. 3. Societal Implications: If we consider the role of religion and mythologies, the punishment bestowed upon Prometheus exhibited that Gods vied in maintaining their superiority to human beings. This is why the gods are depicted with human-like traits, as they reside above the human realm – divine, omnipotent, and almost perfect. The ancient world operated upon the notion that the gods encouraged a system of worship established through obedience and fear. Yet, by being the opposition, Prometheus signified a new phase of human history's evolution, upending such a commanding and deifying status quo. In conclusion, Prometheus's act of disobedience can be read from different perspectives: a sense of responsibility, a pioneer of humanism, or a rebel leader. The story teaches humankind a valuable moral lesson - together with the value of progress, they must also acknowledge and consider which factors affect the decision-making process and should follow this balance spiritually, morally, and ethically.<|end_of_text|>
+2026-05-08 23:17:25 - INFO - __main__ - Prompt sample 204 of the raw training set:
+
+<|begin_of_text|><|start_header_id|>user<|end_header_id|>
+
+Implement a basic Tic-Tac-Toe game in Python using object-oriented programming principles. The game should support two players taking turns on the command line, display the current board state after each move, and detect when a player has won or the game is a draw.
+PLAINFORMAT<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+class TicTacToe:
+    def __init__(self):
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.current_player = "X"
+
+    def display_board(self):
+        for row in self.board:
+            print("|".join(row))
+            print("-" * 5)
+
+    def is_valid_move(self, row, col):
+        return self.board[row][col] == ' '
+
+    def make_move(self, row, col):
+        if not self.is_valid_move(row, col):
+            return False
+
+        self.board[row][col] = self.current_player
+        if self.check_winner():
+            print(f"Player {self.current_player} wins!")
+            return True
+
+        if self.check_draw():
+            print("It's a draw!")
+            return True
+
+        self.switch_player()
+        return False
+
+    def check_winner(self):
+        for row in self.board:
+            if row[0] == row[1] == row[2] != ' ':
+                return True
+
+        for col in range(3):
+            if self.board[0][col] == self.board[1][col] == self.board[2][col] != ' ':
+                return True
+
+        if self.board[0][0] == self.board[1][1] == self.board[2][2] != ' ':
+            return True
+
+        if self.board[0][2] == self.board[1][1] == self.board[2][0] != ' ':
+            return True
+
+        return False
+
+    def check_draw(self):
+        for row in self.board:
+            for cell in row:
+                if cell == ' ':
+                    return False
+        return True
+
+    def switch_player(self):
+        if self.current_player == "X":
+            self.current_player = "O"
+        else:
+            self.current_player = "X"
+
+    def play(self):
+        print("Welcome to Tic Tac Toe!")
+        self.display_board()
+
+        while True:
+            row = int(input(f"Player {self.current_player}, enter the row (0-2): "))
+            col = int(input(f"Player {self.current_player}, enter the column (0-2): "))
+
+            if 0 <= row < 3 and 0 <= col < 3:
+                if self.make_move(row, col):
+                    self.display_board()
+                    break
+                self.display_board()
+            else:
+                print("Invalid input. Please try again.")
+
+
+if __name__ == "__main__":
+    game = TicTacToe()
+    game.play()<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+How would you modify the above Tic Tac Toe game to include an AI opponent using a simple strategy, such as blocking the player's winning moves or randomly selecting an available spot?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+To modify the game to include an AI opponent, we would need to add some logic to the make_move method to decide the AI's move when it's their turn. A simple strategy could be to first check if the player is about to win and block them, and if not, select a random available spot.
+
+Here's how you could implement this:
+
+```python
+import random
+
+class TicTacToe:
+    def __init__(self):
+        self.board = [[' ' for _ in range(3)] for _ in range(3)]
+        self.current_player = "X"
+
+    # ... rest of the class as before ...
+
+    def get_empty_cells(self):
+        return [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == ' ']
+
+    def ai_move(self):
+        # Check if player is about to win and block them
+        for i, j in self.get_empty_cells():
+            self.board[i][j] = "X"  # Assume player is "X"
+            if self.check_winner():
+                self.board[i][j] = "O"  # AI is "O"
+                return
+            self.board[i][j] = ' '  # Reset cell
+
+        # If no blocking move is found, select a random available spot
+        i, j = random.choice(self.get_empty_cells())
+        self.board[i][j] = "O"
+
+    def play(self):
+        print("Welcome to Tic Tac Toe!")
+        self.display_board()
+
+        while True:
+            if self.current_player == "X":
+                row = int(input("Player X, enter the row (0-2): "))
+                col = int(input("Player X, enter the column (0-2): "))
+                if 0 <= row < 3 and 0 <= col < 3 and self.make_move(row, col):
+                    self.display_board()
+                    if self.check_winner() or self.check_draw():
+                        break
+            else:
+                self.ai_move()
+                self.display_board()
+                if self.check_winner() or self.check_draw():
+                    break
+            self.switch_player()
+
+if __name__ == "__main__":
+    game = TicTacToe()
+    game.play()
+```
+
+In this version, when it's the AI's turn (when `self.current_player` is "O"), the `ai_move` method is called. This method first checks if the player is about to win by trying to place the player's piece in each<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Explain the logic behind the AI's strategy in the modified Tic Tac Toe game.<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+The AI's strategy in the modified Tic Tac Toe game is quite simple and follows two main steps:
+
+1. **Block the player's winning move:** The AI checks if the player is about to win on their next move. It does this by iterating over all the empty cells on the board and temporarily placing the player's piece ("X") in each one. If any of these moves would result in the player winning (checked using the `check_winner` method), the AI places its own piece ("O") in that cell, effectively blocking the player's win. If no such cell is found, it moves on to the next step.
+
+2. **Randomly select an available spot:** If the player is not about to win on their next move, the AI simply selects a random cell from all the empty cells on the board and places its piece there.
+
+This strategy ensures that the AI will always block the player's winning move if one is available. If not, it makes a random move. This strategy doesn't guarantee that the AI will win the game, but it does make it more challenging for the player. A more advanced strategy could involve the AI trying to create its own winning opportunities, but that would be more complex to implement.<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+Can you elaborate on how you would enhance the AI's strategy to not only block the player's winning moves but also create its own winning opportunities?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+
+2026-05-08 23:17:25 - INFO - __main__ - Chosen sample 204 of the raw training set:
+
+To enhance the AI's strategy to create its own winning opportunities, we could add another step in the `ai_move` method. Before checking for blocking moves or making a random move, the AI could first check if it has a winning move available. This can be done in a similar way to the blocking step, but instead of placing the player's piece in each empty cell to check for a win, the AI places its own piece. Here's how this could be implemented:
+
+```python
+def ai_move(self):
+    # Check if AI has a winning move and make it
+    for i, j in self.get_empty_cells():
+        self.board[i][j] = "O"  # Assume AI is "O"
+        if self.check_winner():
+            return
+        self.board[i][j] = ' '  # Reset cell
+
+    # If no winning move is found, check if player is about to win and block them
+    for i, j in self.get_empty_cells():
+        self.board[i][j] = "X"  # Assume player is "X"
+        if self.check_winner():
+            self.board[i][j] = "O"  # AI is "O"
+            return
+        self.board[i][j] = ' '  # Reset cell
+
+    # If no blocking move is found, select a random available spot
+    i, j = random.choice(self.get_empty_cells())
+    self.board[i][j] = "O"
+```
+
+With this enhanced strategy, the AI will first check if it can win on its current move. If it can, it will make that move and win the game. If it can't, it will then check if the player is about to win and block them if necessary. If the player is not about to win, the AI will make a random move. This makes the AI a much more formidable opponent, as it not only blocks the player's winning moves but also actively tries to win the game itself.<|end_of_text|>
+2026-05-08 23:17:25 - INFO - __main__ - Rejected sample 204 of the raw training set:
+
+Sure, to create its own winning opportunities, the AI would need to have some knowledge of the game state and the possible moves that could lead to a win. One way to do this is to use minimax algorithm with alpha-beta pruning or negamax algorithm to search the possible future board states until it finds a winning move.
+
+Here are the high-level steps that you could follow to enhance the AI's strategy:
+
+1. **Evaluate the game state:** Calculate a heuristic value for the current board state which represents how good, bad or about equal it is for the AI. This value should take into account factors like the number and position of the pieces, available options (moves that can be made), and any other features like diagonals. 2. **Generate the winning moves:** Find all the possible moves that result in a winning position for the AI. This could be done by enumerating all possible moves and using a search algorithm to evaluate their respective outcomes. This algorithm needs to check if the move is valid (calling `is_valid_move`) and if the AI would win (by calling `check_winner`) after making the move. 3. **Choose the best move:** Select the move that results in the most favorable board state (based on the heuristic value) for the AI. This decision can be made using a search algorithm that explores the possible future board states in a tree-like structure from the current board state until a winning move is found. To make the search efficient and avoid redundant calculations, you can use pruning strategies like alpha-beta pruning, or negamax algorithm. 4. **Incorporate the opponent considering moves, blocks, and counter-moves:** While the previous steps would generate winning moves, it's possible the opponent may preemptively counter those moves. Therefore, the AI should expand its strategy to include opponent considering moves and utilities. This analysis can be done by inserting random games from the start of the match till current state to determine the next best move. This would equate to the opponent considering moves, blocks, and counter-moves. 5. **Rank moves from best to worst:** If there is no clear winning move, the AI should select the move that gives it the best position or forces a draw., ranking them in order of preference, the algorithm can consult the game engine to create an approximation of the winning probability of each move, this approximation will be our heuristic value.
+Omega pruning can also be employed to speed up the search tree. 6. **Apply the best move:** Once the best move is chosen for the AI, the player can make the move on the board and the algorithm ensues. I hope, these insights help you Enhance the AI's Strategy in the game!<|end_of_text|>
+[INFO|configuration_utils.py:697] 2026-05-08 23:17:25,851 >> loading configuration file /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher/config.json
+[INFO|configuration_utils.py:771] 2026-05-08 23:17:25,854 >> Model config LlamaConfig {
+  "_name_or_path": "/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher",
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 128000,
+  "eos_token_id": 128001,
+  "head_dim": 128,
+  "hidden_act": "silu",
+  "hidden_size": 4096,
+  "initializer_range": 0.02,
+  "intermediate_size": 14336,
+  "max_position_embeddings": 131072,
+  "mlp_bias": false,
+  "model_type": "llama",
+  "num_attention_heads": 32,
+  "num_hidden_layers": 32,
+  "num_key_value_heads": 8,
+  "pretraining_tp": 1,
+  "rms_norm_eps": 1e-05,
+  "rope_scaling": {
+    "factor": 8.0,
+    "high_freq_factor": 4.0,
+    "low_freq_factor": 1.0,
+    "original_max_position_embeddings": 8192,
+    "rope_type": "llama3"
+  },
+  "rope_theta": 500000.0,
+  "tie_word_embeddings": false,
+  "torch_dtype": "bfloat16",
+  "transformers_version": "4.49.0",
+  "use_cache": true,
+  "vocab_size": 128256
+}
+
+[INFO|modeling_utils.py:3979] 2026-05-08 23:17:25,863 >> loading weights file /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher/model.safetensors.index.json
+[INFO|modeling_utils.py:4162] 2026-05-08 23:17:25,864 >> Detected DeepSpeed ZeRO-3: activating zero.init() for this model
+[INFO|configuration_utils.py:1140] 2026-05-08 23:17:25,886 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "eos_token_id": 128001
+}
+
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.70s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.71s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.71s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.74s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.76s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.75s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.76s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:05,  1.92s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.74s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.75s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.75s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.76s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.77s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.76s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.76s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.77s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.64s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.66s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.67s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.66s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.68s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.68s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.65s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.69s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.38s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.20s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.38s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.17s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.38s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.38s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.38s/it]
+
+[INFO|modeling_utils.py:4970] 2026-05-08 23:17:33,196 >> All model checkpoint weights were used when initializing LlamaForCausalLM.
+
+[INFO|modeling_utils.py:4978] 2026-05-08 23:17:33,196 >> All the weights of LlamaForCausalLM were initialized from the model checkpoint at /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use LlamaForCausalLM for predictions without further training.
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.19s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.38s/it]
+[INFO|configuration_utils.py:1093] 2026-05-08 23:17:33,218 >> loading configuration file /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher/generation_config.json
+[INFO|configuration_utils.py:1140] 2026-05-08 23:17:33,219 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "do_sample": true,
+  "eos_token_id": 128001,
+  "temperature": 0.6,
+  "top_p": 0.9
+}
+
+[INFO|configuration_utils.py:697] 2026-05-08 23:17:33,219 >> loading configuration file /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher/config.json
+[INFO|configuration_utils.py:771] 2026-05-08 23:17:33,220 >> Model config LlamaConfig {
+  "_name_or_path": "/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher",
+  "architectures": [
+    "LlamaForCausalLM"
+  ],
+  "attention_bias": false,
+  "attention_dropout": 0.0,
+  "bos_token_id": 128000,
+  "eos_token_id": 128001,
+  "head_dim": 128,
+  "hidden_act": "silu",
+  "hidden_size": 4096,
+  "initializer_range": 0.02,
+  "intermediate_size": 14336,
+  "max_position_embeddings": 131072,
+  "mlp_bias": false,
+  "model_type": "llama",
+  "num_attention_heads": 32,
+  "num_hidden_layers": 32,
+  "num_key_value_heads": 8,
+  "pretraining_tp": 1,
+  "rms_norm_eps": 1e-05,
+  "rope_scaling": {
+    "factor": 8.0,
+    "high_freq_factor": 4.0,
+    "low_freq_factor": 1.0,
+    "original_max_position_embeddings": 8192,
+    "rope_type": "llama3"
+  },
+  "rope_theta": 500000.0,
+  "tie_word_embeddings": false,
+  "torch_dtype": "bfloat16",
+  "transformers_version": "4.49.0",
+  "use_cache": true,
+  "vocab_size": 128256
+}
+
+[INFO|modeling_utils.py:3979] 2026-05-08 23:17:33,221 >> loading weights file /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher/model.safetensors.index.json
+[INFO|modeling_utils.py:4162] 2026-05-08 23:17:33,221 >> Detected DeepSpeed ZeRO-3: activating zero.init() for this model
+[INFO|configuration_utils.py:1140] 2026-05-08 23:17:33,225 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "eos_token_id": 128001
+}
+
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.21s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.21s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.39s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.39s/it]
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.53s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.55s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.55s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.55s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.57s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.59s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.59s/it]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.60s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.74s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.74s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.74s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.75s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.75s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.76s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.78s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:03<00:03,  1.77s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.77s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.76s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.79s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.79s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.80s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.80s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.80s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:05<00:01,  1.82s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.26s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.43s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.25s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.43s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.26s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.43s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+[INFO|modeling_utils.py:4970] 2026-05-08 23:17:40,711 >> All model checkpoint weights were used when initializing LlamaForCausalLM.
+
+[INFO|modeling_utils.py:4978] 2026-05-08 23:17:40,712 >> All the weights of LlamaForCausalLM were initialized from the model checkpoint at /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use LlamaForCausalLM for predictions without further training.
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.26s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.44s/it]
+[INFO|configuration_utils.py:1093] 2026-05-08 23:17:40,733 >> loading configuration file /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/ref_teacher/generation_config.json
+[INFO|configuration_utils.py:1140] 2026-05-08 23:17:40,734 >> Generate config GenerationConfig {
+  "bos_token_id": 128000,
+  "do_sample": true,
+  "eos_token_id": 128001,
+  "temperature": 0.6,
+  "top_p": 0.9
+}
+
+Tokenizing train dataset (num_proc=64):   0%|          | 0/6750 [00:00<?, ? examples/s]Tokenizing train dataset (num_proc=64):   0%|          | 20/6750 [00:03<21:39,  5.18 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:44,933 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2277 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):   1%|          | 77/6750 [00:04<04:31, 24.55 examples/s]Tokenizing train dataset (num_proc=64):   3%|▎         | 185/6750 [00:04<01:32, 70.97 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:45,374 >> Token indices sequence length is longer than the specified maximum sequence length for this model (3456 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):   4%|▍         | 292/6750 [00:04<00:52, 123.90 examples/s]Tokenizing train dataset (num_proc=64):   5%|▌         | 363/6750 [00:04<00:39, 161.02 examples/s]Tokenizing train dataset (num_proc=64):   7%|▋         | 500/6750 [00:04<00:25, 248.49 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:45,854 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2489 > 2048). Running this sequence through the model will result in indexing errors
+[WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:45,887 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2647 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):   9%|▉         | 595/6750 [00:05<00:20, 295.25 examples/s]Tokenizing train dataset (num_proc=64):  11%|█         | 716/6750 [00:05<00:16, 363.12 examples/s]Tokenizing train dataset (num_proc=64):  12%|█▏        | 823/6750 [00:05<00:14, 408.23 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:46,404 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2764 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  14%|█▍        | 953/6750 [00:05<00:12, 469.85 examples/s]Tokenizing train dataset (num_proc=64):  15%|█▌        | 1038/6750 [00:05<00:12, 464.47 examples/s]Tokenizing train dataset (num_proc=64):  17%|█▋        | 1145/6750 [00:05<00:11, 486.66 examples/s]Tokenizing train dataset (num_proc=64):  19%|█▊        | 1255/6750 [00:06<00:10, 506.03 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:47,322 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2089 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  20%|██        | 1366/6750 [00:06<00:10, 524.01 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:47,483 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2351 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  22%|██▏       | 1466/6750 [00:06<00:10, 520.51 examples/s]Tokenizing train dataset (num_proc=64):  23%|██▎       | 1581/6750 [00:06<00:09, 543.31 examples/s]Tokenizing train dataset (num_proc=64):  25%|██▌       | 1696/6750 [00:06<00:09, 551.91 examples/s]Tokenizing train dataset (num_proc=64):  27%|██▋       | 1796/6750 [00:07<00:09, 539.01 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:48,146 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2769 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  28%|██▊       | 1884/6750 [00:07<00:09, 517.53 examples/s]Tokenizing train dataset (num_proc=64):  30%|██▉       | 2014/6750 [00:07<00:08, 570.40 examples/s]Tokenizing train dataset (num_proc=64):  31%|███       | 2103/6750 [00:07<00:08, 535.66 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:48,750 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2210 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  33%|███▎      | 2197/6750 [00:07<00:08, 525.29 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:48,917 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2137 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  34%|███▍      | 2303/6750 [00:08<00:08, 528.05 examples/s]Tokenizing train dataset (num_proc=64):  36%|███▌      | 2410/6750 [00:08<00:08, 539.44 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:49,446 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2593 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  37%|███▋      | 2507/6750 [00:08<00:08, 526.35 examples/s]Tokenizing train dataset (num_proc=64):  39%|███▉      | 2627/6750 [00:08<00:07, 550.92 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:49,803 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2899 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  41%|████      | 2747/6750 [00:08<00:07, 569.99 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:49,908 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2215 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  42%|████▏     | 2851/6750 [00:09<00:07, 554.11 examples/s]Tokenizing train dataset (num_proc=64):  44%|████▍     | 2968/6750 [00:09<00:06, 562.10 examples/s]Tokenizing train dataset (num_proc=64):  45%|████▌     | 3066/6750 [00:09<00:06, 543.33 examples/s]Tokenizing train dataset (num_proc=64):  47%|████▋     | 3154/6750 [00:09<00:06, 516.58 examples/s]Tokenizing train dataset (num_proc=64):  49%|████▊     | 3283/6750 [00:09<00:06, 561.05 examples/s]Tokenizing train dataset (num_proc=64):  50%|█████     | 3390/6750 [00:10<00:06, 553.14 examples/s]Tokenizing train dataset (num_proc=64):  51%|█████     | 3456/6750 [00:10<00:06, 489.48 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:51,254 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2380 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  53%|█████▎    | 3584/6750 [00:10<00:05, 542.43 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:51,532 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2585 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  55%|█████▍    | 3700/6750 [00:10<00:05, 565.12 examples/s]Tokenizing train dataset (num_proc=64):  56%|█████▋    | 3810/6750 [00:10<00:05, 554.15 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:51,835 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2085 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  58%|█████▊    | 3894/6750 [00:11<00:05, 516.27 examples/s]Tokenizing train dataset (num_proc=64):  60%|█████▉    | 4019/6750 [00:11<00:04, 546.52 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:52,342 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2433 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  61%|██████    | 4118/6750 [00:11<00:04, 538.02 examples/s]Tokenizing train dataset (num_proc=64):  63%|██████▎   | 4230/6750 [00:11<00:04, 550.12 examples/s]Tokenizing train dataset (num_proc=64):  64%|██████▍   | 4331/6750 [00:11<00:04, 541.45 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:52,811 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2301 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  65%|██████▌   | 4417/6750 [00:12<00:04, 517.34 examples/s]Tokenizing train dataset (num_proc=64):  67%|██████▋   | 4519/6750 [00:12<00:04, 522.48 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:53,184 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2558 > 2048). Running this sequence through the model will result in indexing errors
+[WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:53,360 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2273 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  68%|██████▊   | 4618/6750 [00:12<00:04, 520.61 examples/s]Tokenizing train dataset (num_proc=64):  70%|███████   | 4729/6750 [00:12<00:03, 540.80 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:53,660 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2859 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  72%|███████▏  | 4841/6750 [00:12<00:03, 548.83 examples/s]Tokenizing train dataset (num_proc=64):  73%|███████▎  | 4942/6750 [00:12<00:03, 535.69 examples/s]Tokenizing train dataset (num_proc=64):  75%|███████▍  | 5057/6750 [00:13<00:03, 551.02 examples/s]Tokenizing train dataset (num_proc=64):  77%|███████▋  | 5175/6750 [00:13<00:02, 573.29 examples/s]Tokenizing train dataset (num_proc=64):  78%|███████▊  | 5274/6750 [00:13<00:02, 555.97 examples/s]Tokenizing train dataset (num_proc=64):  80%|███████▉  | 5382/6750 [00:13<00:02, 553.63 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:54,753 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2700 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  81%|████████  | 5461/6750 [00:13<00:02, 513.39 examples/s]Tokenizing train dataset (num_proc=64):  83%|████████▎ | 5571/6750 [00:14<00:02, 524.98 examples/s]Tokenizing train dataset (num_proc=64):  84%|████████▍ | 5692/6750 [00:14<00:01, 547.76 examples/s]Tokenizing train dataset (num_proc=64):  86%|████████▌ | 5803/6750 [00:14<00:01, 554.14 examples/s]Tokenizing train dataset (num_proc=64):  88%|████████▊ | 5912/6750 [00:14<00:01, 551.56 examples/s]Tokenizing train dataset (num_proc=64):  89%|████████▉ | 6014/6750 [00:14<00:01, 540.86 examples/s]Tokenizing train dataset (num_proc=64):  90%|█████████ | 6096/6750 [00:15<00:01, 509.21 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:56,119 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2050 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  92%|█████████▏| 6210/6750 [00:15<00:01, 537.78 examples/s]Tokenizing train dataset (num_proc=64):  94%|█████████▍| 6361/6750 [00:15<00:00, 679.76 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:56,468 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2463 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  96%|█████████▌| 6448/6750 [00:15<00:00, 643.46 examples/s]Tokenizing train dataset (num_proc=64):  97%|█████████▋| 6524/6750 [00:15<00:00, 569.46 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:56,780 >> Token indices sequence length is longer than the specified maximum sequence length for this model (3190 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64):  98%|█████████▊| 6600/6750 [00:15<00:00, 604.28 examples/s]Tokenizing train dataset (num_proc=64):  99%|█████████▉| 6685/6750 [00:16<00:00, 618.92 examples/s][WARNING|tokenization_utils_base.py:3945] 2026-05-08 23:17:57,112 >> Token indices sequence length is longer than the specified maximum sequence length for this model (2791 > 2048). Running this sequence through the model will result in indexing errors
+Tokenizing train dataset (num_proc=64): 100%|██████████| 6750/6750 [00:16<00:00, 571.49 examples/s]Tokenizing train dataset (num_proc=64): 100%|██████████| 6750/6750 [00:16<00:00, 405.99 examples/s]
+[INFO|trainer.py:746] 2026-05-08 23:17:57,726 >> Using auto half precision backend
+[INFO|deepspeed.py:334] 2026-05-08 23:18:01,655 >> Detected ZeRO Offload and non-DeepSpeed optimizers: This combination should work as long as the custom optimizer has both CPU and GPU implementation (except LAMB)
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.[93m [WARNING] [0m DeepSpeed Op Builder: Installed CUDA version 13.0 does not match the version torch was compiled with 12.4.Detected `DS_SKIP_CUDA_CHECK=1`: Allowing this combination of CUDA, but it may result in unexpected behavior.
+
+Adam Optimizer #0 is created with AVX512 arithmetic capability.
+Config: alpha=0.000000, betas=(0.900000, 0.999000), weight_decay=0.010000, adam_w=1
+[INFO|trainer.py:2405] 2026-05-08 23:18:18,835 >> ***** Running training *****
+[INFO|trainer.py:2406] 2026-05-08 23:18:18,835 >>   Num examples = 6,750
+[INFO|trainer.py:2407] 2026-05-08 23:18:18,835 >>   Num Epochs = 1
+[INFO|trainer.py:2408] 2026-05-08 23:18:18,835 >>   Instantaneous batch size per device = 1
+[INFO|trainer.py:2411] 2026-05-08 23:18:18,835 >>   Total train batch size (w. parallel, distributed & accumulation) = 128
+[INFO|trainer.py:2412] 2026-05-08 23:18:18,835 >>   Gradient Accumulation steps = 16
+[INFO|trainer.py:2413] 2026-05-08 23:18:18,835 >>   Total optimization steps = 52
+[INFO|trainer.py:2414] 2026-05-08 23:18:18,836 >>   Number of trainable parameters = 8,030,261,248
+  0%|          | 0/52 [00:00<?, ?it/s][WARNING|logging.py:329] 2026-05-08 23:18:18,867 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,890 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,890 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,891 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,891 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,891 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,891 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|logging.py:329] 2026-05-08 23:18:18,892 >> `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,184 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,186 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,186 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,187 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,188 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,190 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,191 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+[WARNING|modeling_utils.py:1210] 2026-05-08 23:18:22,191 >> Could not estimate the number of tokens of the input, floating-point operations will not be computed
+  2%|▏         | 1/52 [00:39<33:52, 39.85s/it]                                              {'loss': 11.0625, 'grad_norm': 154.87081909179688, 'learning_rate': 8.333333333333333e-08, 'loss/chosen-sft': 1.802734375, 'loss/dpo': 0.69140625, 'rewards/chosen': 0.0, 'rewards/rejected': 0.0, 'rewards/accuracies': 0.0, 'rewards/margins': 0.0, 'logps/chosen': -458.0, 'logps/rejected': -468.0, 'logits/chosen': -1.2890625, 'logits/rejected': -1.25, 'epoch': 0.02}
+  2%|▏         | 1/52 [00:39<33:52, 39.85s/it]  4%|▍         | 2/52 [01:15<30:59, 37.19s/it]                                              {'loss': 11.0625, 'grad_norm': 161.69903564453125, 'learning_rate': 1.6666666666666665e-07, 'loss/chosen-sft': 2.428466796875, 'loss/dpo': 0.69140625, 'rewards/chosen': 0.0, 'rewards/rejected': 0.0, 'rewards/accuracies': 0.0, 'rewards/margins': 0.0, 'logps/chosen': -368.0, 'logps/rejected': -488.0, 'logits/chosen': -1.015625, 'logits/rejected': -0.9140625, 'epoch': 0.04}
+  4%|▍         | 2/52 [01:15<30:59, 37.19s/it]  6%|▌         | 3/52 [01:54<31:05, 38.07s/it]                                              {'loss': 11.104, 'grad_norm': 157.09913635253906, 'learning_rate': 2.5e-07, 'loss/chosen-sft': 1.62060546875, 'loss/dpo': 0.6953125, 'rewards/chosen': 0.004058837890625, 'rewards/rejected': 0.0050048828125, 'rewards/accuracies': 0.4375, 'rewards/margins': -0.00093841552734375, 'logps/chosen': -544.0, 'logps/rejected': -624.0, 'logits/chosen': -1.15625, 'logits/rejected': -1.203125, 'epoch': 0.06}
+  6%|▌         | 3/52 [01:54<31:05, 38.07s/it]  8%|▊         | 4/52 [02:31<30:03, 37.58s/it]                                              {'loss': 11.1035, 'grad_norm': 155.537841796875, 'learning_rate': 3.333333333333333e-07, 'loss/chosen-sft': 1.5986328125, 'loss/dpo': 0.69189453125, 'rewards/chosen': 0.0035247802734375, 'rewards/rejected': 0.0017242431640625, 'rewards/accuracies': 0.3125, 'rewards/margins': 0.001800537109375, 'logps/chosen': -484.0, 'logps/rejected': -470.0, 'logits/chosen': -1.0859375, 'logits/rejected': -0.97265625, 'epoch': 0.08}
+  8%|▊         | 4/52 [02:31<30:03, 37.58s/it] 10%|▉         | 5/52 [03:08<29:21, 37.49s/it]                                              {'loss': 11.0771, 'grad_norm': 158.89279174804688, 'learning_rate': 4.1666666666666667e-07, 'loss/chosen-sft': 1.623504638671875, 'loss/dpo': 0.6923828125, 'rewards/chosen': 0.0010986328125, 'rewards/rejected': 0.0, 'rewards/accuracies': 0.4375, 'rewards/margins': 0.00109100341796875, 'logps/chosen': -288.0, 'logps/rejected': -418.0, 'logits/chosen': -0.98046875, 'logits/rejected': -1.015625, 'epoch': 0.09}
+ 10%|▉         | 5/52 [03:08<29:21, 37.49s/it] 12%|█▏        | 6/52 [03:47<29:08, 38.01s/it]                                              {'loss': 11.0889, 'grad_norm': 156.61660766601562, 'learning_rate': 5e-07, 'loss/chosen-sft': 1.90771484375, 'loss/dpo': 0.6943359375, 'rewards/chosen': -0.0028076171875, 'rewards/rejected': 0.002899169921875, 'rewards/accuracies': 0.25, 'rewards/margins': -0.005706787109375, 'logps/chosen': -340.0, 'logps/rejected': -416.0, 'logits/chosen': -0.9765625, 'logits/rejected': -1.078125, 'epoch': 0.11}
+ 12%|█▏        | 6/52 [03:47<29:08, 38.01s/it] 13%|█▎        | 7/52 [04:25<28:24, 37.89s/it]                                              {'loss': 11.1021, 'grad_norm': 147.9259033203125, 'learning_rate': 4.994171922976348e-07, 'loss/chosen-sft': 1.385498046875, 'loss/dpo': 0.69580078125, 'rewards/chosen': -0.0029754638671875, 'rewards/rejected': 0.0022735595703125, 'rewards/accuracies': 0.3125, 'rewards/margins': -0.0052490234375, 'logps/chosen': -378.0, 'logps/rejected': -440.0, 'logits/chosen': -0.98828125, 'logits/rejected': -1.1015625, 'epoch': 0.13}
+ 13%|█▎        | 7/52 [04:25<28:24, 37.89s/it] 15%|█▌        | 8/52 [05:02<27:43, 37.80s/it]                                              {'loss': 11.085, 'grad_norm': 157.86045837402344, 'learning_rate': 4.976714865090826e-07, 'loss/chosen-sft': 1.371337890625, 'loss/dpo': 0.693359375, 'rewards/chosen': -0.0018768310546875, 'rewards/rejected': 0.0006256103515625, 'rewards/accuracies': 0.375, 'rewards/margins': -0.00250244140625, 'logps/chosen': -548.0, 'logps/rejected': -536.0, 'logits/chosen': -1.0234375, 'logits/rejected': -1.1640625, 'epoch': 0.15}
+ 15%|█▌        | 8/52 [05:02<27:43, 37.80s/it] 17%|█▋        | 9/52 [05:40<27:07, 37.84s/it]                                              {'loss': 11.0425, 'grad_norm': 150.28030395507812, 'learning_rate': 4.947710219205807e-07, 'loss/chosen-sft': 1.32476806640625, 'loss/dpo': 0.6943359375, 'rewards/chosen': -0.000156402587890625, 'rewards/rejected': 0.001953125, 'rewards/accuracies': 0.25, 'rewards/margins': -0.002105712890625, 'logps/chosen': -378.0, 'logps/rejected': -402.0, 'logits/chosen': -1.140625, 'logits/rejected': -1.0703125, 'epoch': 0.17}
+ 17%|█▋        | 9/52 [05:40<27:07, 37.84s/it] 19%|█▉        | 10/52 [06:18<26:32, 37.92s/it]                                               {'loss': 11.0386, 'grad_norm': 145.121826171875, 'learning_rate': 4.907293218369498e-07, 'loss/chosen-sft': 1.8775634765625, 'loss/dpo': 0.688720703125, 'rewards/chosen': 0.0078125, 'rewards/rejected': 0.000156402587890625, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.007659912109375, 'logps/chosen': -358.0, 'logps/rejected': -500.0, 'logits/chosen': -1.1171875, 'logits/rejected': -1.0625, 'epoch': 0.19}
+ 19%|█▉        | 10/52 [06:18<26:32, 37.92s/it] 21%|██        | 11/52 [06:55<25:41, 37.60s/it]                                               {'loss': 11.0571, 'grad_norm': 143.25872802734375, 'learning_rate': 4.855652305297051e-07, 'loss/chosen-sft': 2.0247802734375, 'loss/dpo': 0.688232421875, 'rewards/chosen': 0.0028076171875, 'rewards/rejected': -0.00616455078125, 'rewards/accuracies': 0.4375, 'rewards/margins': 0.00897216796875, 'logps/chosen': -336.0, 'logps/rejected': -344.0, 'logits/chosen': -1.1015625, 'logits/rejected': -1.0390625, 'epoch': 0.21}
+ 21%|██        | 11/52 [06:55<25:41, 37.60s/it] 23%|██▎       | 12/52 [07:36<25:43, 38.59s/it]                                               {'loss': 11.0669, 'grad_norm': 163.6415252685547, 'learning_rate': 4.793028253763632e-07, 'loss/chosen-sft': 1.4454345703125, 'loss/dpo': 0.690185546875, 'rewards/chosen': -0.00469970703125, 'rewards/rejected': -0.0078125, 'rewards/accuracies': 0.4375, 'rewards/margins': 0.0031280517578125, 'logps/chosen': -442.0, 'logps/rejected': -382.0, 'logits/chosen': -1.1171875, 'logits/rejected': -1.1328125, 'epoch': 0.23}
+ 23%|██▎       | 12/52 [07:36<25:43, 38.59s/it] 25%|██▌       | 13/52 [08:17<25:34, 39.34s/it]                                               {'loss': 11.0444, 'grad_norm': 154.8407440185547, 'learning_rate': 4.7197130460059377e-07, 'loss/chosen-sft': 1.99951171875, 'loss/dpo': 0.687255859375, 'rewards/chosen': 0.004150390625, 'rewards/rejected': -0.00750732421875, 'rewards/accuracies': 0.3125, 'rewards/margins': 0.01165771484375, 'logps/chosen': -464.0, 'logps/rejected': -540.0, 'logits/chosen': -1.0390625, 'logits/rejected': -1.0546875, 'epoch': 0.25}
+ 25%|██▌       | 13/52 [08:17<25:34, 39.34s/it] 27%|██▋       | 14/52 [08:58<25:17, 39.93s/it]                                               {'loss': 11.0698, 'grad_norm': 147.53616333007812, 'learning_rate': 4.6360485113662214e-07, 'loss/chosen-sft': 1.434814453125, 'loss/dpo': 0.69091796875, 'rewards/chosen': -0.0025787353515625, 'rewards/rejected': -0.005462646484375, 'rewards/accuracies': 0.375, 'rewards/margins': 0.002899169921875, 'logps/chosen': -300.0, 'logps/rejected': -312.0, 'logits/chosen': -0.9453125, 'logits/rejected': -0.90234375, 'epoch': 0.27}
+ 27%|██▋       | 14/52 [08:58<25:17, 39.93s/it] 29%|██▉       | 15/52 [09:38<24:33, 39.82s/it]                                               {'loss': 11.0283, 'grad_norm': 156.24710083007812, 'learning_rate': 4.5424247325261047e-07, 'loss/chosen-sft': 1.453857421875, 'loss/dpo': 0.69091796875, 'rewards/chosen': -0.001251220703125, 'rewards/rejected': -0.00689697265625, 'rewards/accuracies': 0.4375, 'rewards/margins': 0.005615234375, 'logps/chosen': -536.0, 'logps/rejected': -334.0, 'logits/chosen': -1.140625, 'logits/rejected': -1.0703125, 'epoch': 0.28}
+ 29%|██▉       | 15/52 [09:38<24:33, 39.82s/it] 31%|███       | 16/52 [10:19<24:02, 40.08s/it]                                               {'loss': 11.0171, 'grad_norm': 155.34568786621094, 'learning_rate': 4.4392782267610495e-07, 'loss/chosen-sft': 1.692626953125, 'loss/dpo': 0.688720703125, 'rewards/chosen': -0.0067138671875, 'rewards/rejected': -0.013671875, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.0069580078125, 'logps/chosen': -382.0, 'logps/rejected': -460.0, 'logits/chosen': -1.1015625, 'logits/rejected': -1.140625, 'epoch': 0.3}
+ 31%|███       | 16/52 [10:19<24:02, 40.08s/it] 33%|███▎      | 17/52 [10:56<22:52, 39.20s/it]                                               {'loss': 11.0254, 'grad_norm': 144.41184997558594, 'learning_rate': 4.3270899106953104e-07, 'loss/chosen-sft': 1.6376953125, 'loss/dpo': 0.6904296875, 'rewards/chosen': -0.002899169921875, 'rewards/rejected': -0.004913330078125, 'rewards/accuracies': 0.3125, 'rewards/margins': 0.0020294189453125, 'logps/chosen': -446.0, 'logps/rejected': -462.0, 'logits/chosen': -1.203125, 'logits/rejected': -1.1484375, 'epoch': 0.32}
+ 33%|███▎      | 17/52 [10:56<22:52, 39.20s/it] 35%|███▍      | 18/52 [11:33<21:48, 38.49s/it]                                               {'loss': 11.0259, 'grad_norm': 150.722900390625, 'learning_rate': 4.206382858046635e-07, 'loss/chosen-sft': 1.559326171875, 'loss/dpo': 0.689453125, 'rewards/chosen': 0.00156402587890625, 'rewards/rejected': -0.00811767578125, 'rewards/accuracies': 0.3125, 'rewards/margins': 0.00970458984375, 'logps/chosen': -436.0, 'logps/rejected': -628.0, 'logits/chosen': -1.2109375, 'logits/rejected': -1.203125, 'epoch': 0.34}
+ 35%|███▍      | 18/52 [11:33<21:48, 38.49s/it] 37%|███▋      | 19/52 [12:10<20:55, 38.05s/it]                                               {'loss': 10.9736, 'grad_norm': 160.98936462402344, 'learning_rate': 4.077719860815132e-07, 'loss/chosen-sft': 1.72509765625, 'loss/dpo': 0.6923828125, 'rewards/chosen': -0.003753662109375, 'rewards/rejected': -0.00433349609375, 'rewards/accuracies': 0.375, 'rewards/margins': 0.00058746337890625, 'logps/chosen': -420.0, 'logps/rejected': -414.0, 'logits/chosen': -1.0234375, 'logits/rejected': -1.0234375, 'epoch': 0.36}
+ 37%|███▋      | 19/52 [12:10<20:55, 38.05s/it] 38%|███▊      | 20/52 [12:45<19:54, 37.34s/it]                                               {'loss': 11.0044, 'grad_norm': 148.5639190673828, 'learning_rate': 3.941700805287168e-07, 'loss/chosen-sft': 1.423828125, 'loss/dpo': 0.687255859375, 'rewards/chosen': 0.00579833984375, 'rewards/rejected': -0.005096435546875, 'rewards/accuracies': 0.4375, 'rewards/margins': 0.0108642578125, 'logps/chosen': -372.0, 'logps/rejected': -572.0, 'logits/chosen': -1.0859375, 'logits/rejected': -1.0703125, 'epoch': 0.38}
+ 38%|███▊      | 20/52 [12:45<19:54, 37.34s/it] 40%|████      | 21/52 [13:22<19:14, 37.26s/it]                                               {'loss': 10.9253, 'grad_norm': 166.2000732421875, 'learning_rate': 3.798959875088584e-07, 'loss/chosen-sft': 1.35888671875, 'loss/dpo': 0.68896484375, 'rewards/chosen': -0.003753662109375, 'rewards/rejected': -0.01177978515625, 'rewards/accuracies': 0.4375, 'rewards/margins': 0.008056640625, 'logps/chosen': -402.0, 'logps/rejected': -480.0, 'logits/chosen': -1.015625, 'logits/rejected': -1.0390625, 'epoch': 0.4}
+ 40%|████      | 21/52 [13:22<19:14, 37.26s/it] 42%|████▏     | 22/52 [13:58<18:23, 36.78s/it]                                               {'loss': 10.9966, 'grad_norm': 148.4058380126953, 'learning_rate': 3.65016259432788e-07, 'loss/chosen-sft': 1.5615234375, 'loss/dpo': 0.686767578125, 'rewards/chosen': -0.0029754638671875, 'rewards/rejected': -0.01397705078125, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.010986328125, 'logps/chosen': -540.0, 'logps/rejected': -440.0, 'logits/chosen': -1.0546875, 'logits/rejected': -1.1953125, 'epoch': 0.42}
+ 42%|████▏     | 22/52 [13:58<18:23, 36.78s/it] 44%|████▍     | 23/52 [14:36<17:57, 37.15s/it]                                               {'loss': 10.9458, 'grad_norm': 148.5391387939453, 'learning_rate': 3.4960027246156036e-07, 'loss/chosen-sft': 1.6416015625, 'loss/dpo': 0.6787109375, 'rewards/chosen': 0.00921630859375, 'rewards/rejected': -0.017333984375, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.026611328125, 'logps/chosen': -278.0, 'logps/rejected': -396.0, 'logits/chosen': -1.1484375, 'logits/rejected': -1.109375, 'epoch': 0.44}
+ 44%|████▍     | 23/52 [14:36<17:57, 37.15s/it] 46%|████▌     | 24/52 [15:13<17:18, 37.10s/it]                                               {'loss': 10.9937, 'grad_norm': 154.46542358398438, 'learning_rate': 3.337199030427465e-07, 'loss/chosen-sft': 1.41259765625, 'loss/dpo': 0.69091796875, 'rewards/chosen': -0.000782012939453125, 'rewards/rejected': -0.005157470703125, 'rewards/accuracies': 0.625, 'rewards/margins': 0.00439453125, 'logps/chosen': -352.0, 'logps/rejected': -274.0, 'logits/chosen': -1.0703125, 'logits/rejected': -0.953125, 'epoch': 0.45}
+ 46%|████▌     | 24/52 [15:13<17:18, 37.10s/it] 48%|████▊     | 25/52 [15:49<16:34, 36.85s/it]                                               {'loss': 10.9683, 'grad_norm': 162.21319580078125, 'learning_rate': 3.1744919278925604e-07, 'loss/chosen-sft': 1.67431640625, 'loss/dpo': 0.68212890625, 'rewards/chosen': 0.00616455078125, 'rewards/rejected': -0.0150146484375, 'rewards/accuracies': 0.625, 'rewards/margins': 0.021240234375, 'logps/chosen': -382.0, 'logps/rejected': -632.0, 'logits/chosen': -1.1328125, 'logits/rejected': -1.1484375, 'epoch': 0.47}
+ 48%|████▊     | 25/52 [15:49<16:34, 36.85s/it] 50%|█████     | 26/52 [16:26<15:58, 36.86s/it]                                               {'loss': 10.8975, 'grad_norm': 153.4529266357422, 'learning_rate': 3.008640032631585e-07, 'loss/chosen-sft': 1.491943359375, 'loss/dpo': 0.678466796875, 'rewards/chosen': 0.0184326171875, 'rewards/rejected': -0.0137939453125, 'rewards/accuracies': 0.8125, 'rewards/margins': 0.0322265625, 'logps/chosen': -324.0, 'logps/rejected': -414.0, 'logits/chosen': -0.9765625, 'logits/rejected': -1.046875, 'epoch': 0.49}
+ 50%|█████     | 26/52 [16:26<15:58, 36.86s/it] 52%|█████▏    | 27/52 [17:03<15:18, 36.74s/it]                                               {'loss': 10.9302, 'grad_norm': 142.26951599121094, 'learning_rate': 2.840416622740617e-07, 'loss/chosen-sft': 1.5726318359375, 'loss/dpo': 0.685546875, 'rewards/chosen': 0.0032806396484375, 'rewards/rejected': -0.01409912109375, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.017333984375, 'logps/chosen': -276.0, 'logps/rejected': -326.0, 'logits/chosen': -1.0546875, 'logits/rejected': -1.0546875, 'epoch': 0.51}
+ 52%|█████▏    | 27/52 [17:03<15:18, 36.74s/it] 54%|█████▍    | 28/52 [17:41<14:51, 37.16s/it]                                               {'loss': 10.895, 'grad_norm': 151.52127075195312, 'learning_rate': 2.6706060334116775e-07, 'loss/chosen-sft': 1.378662109375, 'loss/dpo': 0.6845703125, 'rewards/chosen': 0.01361083984375, 'rewards/rejected': -0.002197265625, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.0157470703125, 'logps/chosen': -350.0, 'logps/rejected': -324.0, 'logits/chosen': -1.0859375, 'logits/rejected': -1.0390625, 'epoch': 0.53}
+ 54%|█████▍    | 28/52 [17:41<14:51, 37.16s/it] 56%|█████▌    | 29/52 [18:16<14:04, 36.71s/it]                                               {'loss': 10.876, 'grad_norm': 146.18841552734375, 'learning_rate': 2.5e-07, 'loss/chosen-sft': 1.613037109375, 'loss/dpo': 0.681640625, 'rewards/chosen': 0.0123291015625, 'rewards/rejected': -0.01116943359375, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.0235595703125, 'logps/chosen': -324.0, 'logps/rejected': -398.0, 'logits/chosen': -1.03125, 'logits/rejected': -1.078125, 'epoch': 0.55}
+ 56%|█████▌    | 29/52 [18:16<14:04, 36.71s/it] 58%|█████▊    | 30/52 [18:53<13:28, 36.77s/it]                                               {'loss': 10.8525, 'grad_norm': 157.08624267578125, 'learning_rate': 2.3293939665883228e-07, 'loss/chosen-sft': 1.523681640625, 'loss/dpo': 0.682373046875, 'rewards/chosen': 0.01904296875, 'rewards/rejected': -0.0031280517578125, 'rewards/accuracies': 0.625, 'rewards/margins': 0.0220947265625, 'logps/chosen': -498.0, 'logps/rejected': -588.0, 'logits/chosen': -1.109375, 'logits/rejected': -1.15625, 'epoch': 0.57}
+ 58%|█████▊    | 30/52 [18:53<13:28, 36.77s/it] 60%|█████▉    | 31/52 [19:29<12:42, 36.32s/it]                                               {'loss': 10.9541, 'grad_norm': 151.88623046875, 'learning_rate': 2.1595833772593838e-07, 'loss/chosen-sft': 1.4935302734375, 'loss/dpo': 0.6884765625, 'rewards/chosen': 0.0078125, 'rewards/rejected': -0.0029754638671875, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.01080322265625, 'logps/chosen': -340.0, 'logps/rejected': -328.0, 'logits/chosen': -1.0625, 'logits/rejected': -1.0390625, 'epoch': 0.59}
+ 60%|█████▉    | 31/52 [19:29<12:42, 36.32s/it] 62%|██████▏   | 32/52 [20:06<12:11, 36.57s/it]                                               {'loss': 10.894, 'grad_norm': 140.80694580078125, 'learning_rate': 1.9913599673684159e-07, 'loss/chosen-sft': 1.6640625, 'loss/dpo': 0.676025390625, 'rewards/chosen': 0.0135498046875, 'rewards/rejected': -0.01953125, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.033203125, 'logps/chosen': -302.0, 'logps/rejected': -350.0, 'logits/chosen': -1.1484375, 'logits/rejected': -1.1015625, 'epoch': 0.61}
+ 62%|██████▏   | 32/52 [20:06<12:11, 36.57s/it] 63%|██████▎   | 33/52 [20:43<11:37, 36.72s/it]                                               {'loss': 10.8848, 'grad_norm': 152.73277282714844, 'learning_rate': 1.825508072107439e-07, 'loss/chosen-sft': 1.64013671875, 'loss/dpo': 0.68017578125, 'rewards/chosen': 0.03369140625, 'rewards/rejected': 0.01019287109375, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.023681640625, 'logps/chosen': -596.0, 'logps/rejected': -520.0, 'logits/chosen': -1.265625, 'logits/rejected': -1.3125, 'epoch': 0.63}
+ 63%|██████▎   | 33/52 [20:43<11:37, 36.72s/it] 65%|██████▌   | 34/52 [21:22<11:14, 37.49s/it]                                               {'loss': 10.8999, 'grad_norm': 141.2425079345703, 'learning_rate': 1.6628009695725346e-07, 'loss/chosen-sft': 1.6966552734375, 'loss/dpo': 0.677734375, 'rewards/chosen': 0.0133056640625, 'rewards/rejected': -0.018310546875, 'rewards/accuracies': 0.8125, 'rewards/margins': 0.03173828125, 'logps/chosen': -374.0, 'logps/rejected': -298.0, 'logits/chosen': -1.1484375, 'logits/rejected': -0.9921875, 'epoch': 0.64}
+ 65%|██████▌   | 34/52 [21:22<11:14, 37.49s/it] 67%|██████▋   | 35/52 [22:05<11:04, 39.06s/it]                                               {'loss': 10.8384, 'grad_norm': 156.4810028076172, 'learning_rate': 1.5039972753843964e-07, 'loss/chosen-sft': 1.2047119140625, 'loss/dpo': 0.677978515625, 'rewards/chosen': 0.02001953125, 'rewards/rejected': -0.006561279296875, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.026611328125, 'logps/chosen': -448.0, 'logps/rejected': -454.0, 'logits/chosen': -1.0625, 'logits/rejected': -1.171875, 'epoch': 0.66}
+ 67%|██████▋   | 35/52 [22:05<11:04, 39.06s/it] 69%|██████▉   | 36/52 [22:47<10:38, 39.92s/it]                                               {'loss': 10.8438, 'grad_norm': 156.24295043945312, 'learning_rate': 1.3498374056721196e-07, 'loss/chosen-sft': 1.4156494140625, 'loss/dpo': 0.6767578125, 'rewards/chosen': 0.03466796875, 'rewards/rejected': 0.004852294921875, 'rewards/accuracies': 0.75, 'rewards/margins': 0.0299072265625, 'logps/chosen': -486.0, 'logps/rejected': -506.0, 'logits/chosen': -1.1953125, 'logits/rejected': -1.1640625, 'epoch': 0.68}
+ 69%|██████▉   | 36/52 [22:47<10:38, 39.92s/it] 71%|███████   | 37/52 [23:28<10:05, 40.37s/it]                                               {'loss': 10.8921, 'grad_norm': 143.8985137939453, 'learning_rate': 1.2010401249114167e-07, 'loss/chosen-sft': 2.328857421875, 'loss/dpo': 0.68896484375, 'rewards/chosen': 0.00811767578125, 'rewards/rejected': -0.0025787353515625, 'rewards/accuracies': 0.5625, 'rewards/margins': 0.01068115234375, 'logps/chosen': -272.0, 'logps/rejected': -478.0, 'logits/chosen': -1.140625, 'logits/rejected': -1.1796875, 'epoch': 0.7}
+ 71%|███████   | 37/52 [23:28<10:05, 40.37s/it] 73%|███████▎  | 38/52 [24:09<09:26, 40.47s/it]                                               {'loss': 10.9028, 'grad_norm': 146.7362518310547, 'learning_rate': 1.0582991947128323e-07, 'loss/chosen-sft': 1.637908935546875, 'loss/dpo': 0.681884765625, 'rewards/chosen': -0.00156402587890625, 'rewards/rejected': -0.025390625, 'rewards/accuracies': 0.5, 'rewards/margins': 0.0238037109375, 'logps/chosen': -314.0, 'logps/rejected': -334.0, 'logits/chosen': -1.078125, 'logits/rejected': -1.0390625, 'epoch': 0.72}
+ 73%|███████▎  | 38/52 [24:09<09:26, 40.47s/it] 75%|███████▌  | 39/52 [24:51<08:51, 40.90s/it]                                               {'loss': 10.8413, 'grad_norm': 144.731689453125, 'learning_rate': 9.222801391848686e-08, 'loss/chosen-sft': 1.25537109375, 'loss/dpo': 0.677978515625, 'rewards/chosen': 0.024658203125, 'rewards/rejected': -0.004058837890625, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.02880859375, 'logps/chosen': -408.0, 'logps/rejected': -342.0, 'logits/chosen': -1.0390625, 'logits/rejected': -1.1171875, 'epoch': 0.74}
+ 75%|███████▌  | 39/52 [24:51<08:51, 40.90s/it] 77%|███████▋  | 40/52 [25:31<08:07, 40.62s/it]                                               {'loss': 10.9048, 'grad_norm': 148.6552276611328, 'learning_rate': 7.936171419533652e-08, 'loss/chosen-sft': 1.6318359375, 'loss/dpo': 0.687744140625, 'rewards/chosen': -0.002777099609375, 'rewards/rejected': -0.01287841796875, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.0101318359375, 'logps/chosen': -360.0, 'logps/rejected': -378.0, 'logits/chosen': -1.0546875, 'logits/rejected': -1.0859375, 'epoch': 0.76}
+ 77%|███████▋  | 40/52 [25:31<08:07, 40.62s/it] 79%|███████▉  | 41/52 [26:11<07:25, 40.53s/it]                                               {'loss': 10.8818, 'grad_norm': 152.95973205566406, 'learning_rate': 6.729100893046897e-08, 'loss/chosen-sft': 1.71435546875, 'loss/dpo': 0.6845703125, 'rewards/chosen': 0.0191650390625, 'rewards/rejected': 0.00156402587890625, 'rewards/accuracies': 0.625, 'rewards/margins': 0.017578125, 'logps/chosen': -426.0, 'logps/rejected': -322.0, 'logits/chosen': -1.2421875, 'logits/rejected': -1.0625, 'epoch': 0.78}
+ 79%|███████▉  | 41/52 [26:11<07:25, 40.53s/it] 81%|████████  | 42/52 [26:49<06:37, 39.78s/it]                                               {'loss': 10.8037, 'grad_norm': 157.7050018310547, 'learning_rate': 5.607217732389502e-08, 'loss/chosen-sft': 1.58544921875, 'loss/dpo': 0.674072265625, 'rewards/chosen': 0.01953125, 'rewards/rejected': -0.017578125, 'rewards/accuracies': 0.75, 'rewards/margins': 0.037109375, 'logps/chosen': -350.0, 'logps/rejected': -398.0, 'logits/chosen': -1.0859375, 'logits/rejected': -1.125, 'epoch': 0.8}
+ 81%|████████  | 42/52 [26:49<06:37, 39.78s/it] 83%|████████▎ | 43/52 [27:24<05:45, 38.40s/it]                                               {'loss': 10.8062, 'grad_norm': 148.37741088867188, 'learning_rate': 4.57575267473895e-08, 'loss/chosen-sft': 1.297119140625, 'loss/dpo': 0.68115234375, 'rewards/chosen': 0.019287109375, 'rewards/rejected': -0.0031280517578125, 'rewards/accuracies': 0.625, 'rewards/margins': 0.0224609375, 'logps/chosen': -446.0, 'logps/rejected': -556.0, 'logits/chosen': -1.109375, 'logits/rejected': -1.109375, 'epoch': 0.82}
+ 83%|████████▎ | 43/52 [27:24<05:45, 38.40s/it] 85%|████████▍ | 44/52 [28:01<05:04, 38.01s/it]                                               {'loss': 10.8066, 'grad_norm': 153.36094665527344, 'learning_rate': 3.6395148863377854e-08, 'loss/chosen-sft': 1.1827392578125, 'loss/dpo': 0.673095703125, 'rewards/chosen': 0.0198974609375, 'rewards/rejected': -0.01708984375, 'rewards/accuracies': 0.75, 'rewards/margins': 0.036865234375, 'logps/chosen': -338.0, 'logps/rejected': -442.0, 'logits/chosen': -0.93359375, 'logits/rejected': -0.9609375, 'epoch': 0.83}
+ 85%|████████▍ | 44/52 [28:01<05:04, 38.01s/it] 87%|████████▋ | 45/52 [28:37<04:20, 37.26s/it]                                               {'loss': 10.8403, 'grad_norm': 143.04354858398438, 'learning_rate': 2.8028695399406195e-08, 'loss/chosen-sft': 1.965087890625, 'loss/dpo': 0.6728515625, 'rewards/chosen': 0.027587890625, 'rewards/rejected': -0.012939453125, 'rewards/accuracies': 0.75, 'rewards/margins': 0.04052734375, 'logps/chosen': -446.0, 'logps/rejected': -348.0, 'logits/chosen': -1.03125, 'logits/rejected': -0.89453125, 'epoch': 0.85}
+ 87%|████████▋ | 45/52 [28:37<04:20, 37.26s/it] 88%|████████▊ | 46/52 [29:13<03:42, 37.01s/it]                                               {'loss': 10.8564, 'grad_norm': 146.81936645507812, 'learning_rate': 2.069717462363679e-08, 'loss/chosen-sft': 1.658935546875, 'loss/dpo': 0.6748046875, 'rewards/chosen': 0.0184326171875, 'rewards/rejected': -0.017822265625, 'rewards/accuracies': 0.625, 'rewards/margins': 0.036376953125, 'logps/chosen': -440.0, 'logps/rejected': -484.0, 'logits/chosen': -1.109375, 'logits/rejected': -1.0546875, 'epoch': 0.87}
+ 88%|████████▊ | 46/52 [29:13<03:42, 37.01s/it] 90%|█████████ | 47/52 [29:50<03:04, 36.81s/it]                                               {'loss': 10.8354, 'grad_norm': 152.22772216796875, 'learning_rate': 1.44347694702949e-08, 'loss/chosen-sft': 1.761962890625, 'loss/dpo': 0.687744140625, 'rewards/chosen': 0.00360107421875, 'rewards/rejected': -0.00640869140625, 'rewards/accuracies': 0.625, 'rewards/margins': 0.010009765625, 'logps/chosen': -330.0, 'logps/rejected': -380.0, 'logits/chosen': -1.109375, 'logits/rejected': -1.2109375, 'epoch': 0.89}
+ 90%|█████████ | 47/52 [29:50<03:04, 36.81s/it] 92%|█████████▏| 48/52 [30:27<02:28, 37.09s/it]                                               {'loss': 10.8188, 'grad_norm': 204.78271484375, 'learning_rate': 9.270678163050217e-09, 'loss/chosen-sft': 1.822265625, 'loss/dpo': 0.673828125, 'rewards/chosen': 0.021240234375, 'rewards/rejected': -0.01531982421875, 'rewards/accuracies': 0.8125, 'rewards/margins': 0.03662109375, 'logps/chosen': -448.0, 'logps/rejected': -426.0, 'logits/chosen': -1.015625, 'logits/rejected': -1.0078125, 'epoch': 0.91}
+ 92%|█████████▏| 48/52 [30:27<02:28, 37.09s/it] 94%|█████████▍| 49/52 [31:06<01:52, 37.40s/it]                                               {'loss': 10.8203, 'grad_norm': 145.85948181152344, 'learning_rate': 5.228978079419272e-09, 'loss/chosen-sft': 1.42822265625, 'loss/dpo': 0.682861328125, 'rewards/chosen': 0.0194091796875, 'rewards/rejected': -0.0018768310546875, 'rewards/accuracies': 0.6875, 'rewards/margins': 0.021240234375, 'logps/chosen': -414.0, 'logps/rejected': -468.0, 'logits/chosen': -1.140625, 'logits/rejected': -1.25, 'epoch': 0.93}
+ 94%|█████████▍| 49/52 [31:06<01:52, 37.40s/it] 96%|█████████▌| 50/52 [31:42<01:14, 37.22s/it]                                               {'loss': 10.8369, 'grad_norm': 156.77041625976562, 'learning_rate': 2.328513490917311e-09, 'loss/chosen-sft': 1.568359375, 'loss/dpo': 0.679931640625, 'rewards/chosen': 0.01019287109375, 'rewards/rejected': -0.0167236328125, 'rewards/accuracies': 0.75, 'rewards/margins': 0.02685546875, 'logps/chosen': -448.0, 'logps/rejected': -502.0, 'logits/chosen': -1.1875, 'logits/rejected': -1.203125, 'epoch': 0.95}
+ 96%|█████████▌| 50/52 [31:42<01:14, 37.22s/it] 98%|█████████▊| 51/52 [32:20<00:37, 37.43s/it]                                               {'loss': 10.8008, 'grad_norm': 150.65853881835938, 'learning_rate': 5.828077023651845e-10, 'loss/chosen-sft': 1.639892578125, 'loss/dpo': 0.679443359375, 'rewards/chosen': 0.0203857421875, 'rewards/rejected': -0.007354736328125, 'rewards/accuracies': 0.625, 'rewards/margins': 0.0277099609375, 'logps/chosen': -348.0, 'logps/rejected': -348.0, 'logits/chosen': -1.1953125, 'logits/rejected': -1.25, 'epoch': 0.97}
+ 98%|█████████▊| 51/52 [32:20<00:37, 37.43s/it]100%|██████████| 52/52 [32:56<00:00, 36.96s/it]                                               {'loss': 10.8672, 'grad_norm': 144.4149627685547, 'learning_rate': 0.0, 'loss/chosen-sft': 1.2958984375, 'loss/dpo': 0.669189453125, 'rewards/chosen': 0.0137939453125, 'rewards/rejected': -0.03564453125, 'rewards/accuracies': 0.625, 'rewards/margins': 0.04931640625, 'logps/chosen': -292.0, 'logps/rejected': -402.0, 'logits/chosen': -0.81640625, 'logits/rejected': -0.91015625, 'epoch': 0.99}
+100%|██████████| 52/52 [32:56<00:00, 36.96s/it][INFO|trainer.py:3942] 2026-05-08 23:51:26,163 >> Saving model checkpoint to /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/checkpoint-52
+[INFO|configuration_utils.py:423] 2026-05-08 23:51:26,166 >> Configuration saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/checkpoint-52/config.json
+[INFO|configuration_utils.py:909] 2026-05-08 23:51:26,167 >> Configuration saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/checkpoint-52/generation_config.json
+[INFO|modeling_utils.py:3048] 2026-05-08 23:51:37,394 >> The model is bigger than the maximum size per checkpoint (5GB) and is going to be split in 4 checkpoint shards. You can find where each parameters has been saved in the index located at /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/checkpoint-52/model.safetensors.index.json.
+[INFO|tokenization_utils_base.py:2500] 2026-05-08 23:51:37,396 >> tokenizer config file saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/checkpoint-52/tokenizer_config.json
+[INFO|tokenization_utils_base.py:2509] 2026-05-08 23:51:37,396 >> Special tokens file saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/checkpoint-52/special_tokens_map.json
+[INFO|trainer.py:2657] 2026-05-08 23:51:37,874 >> 
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+                                               {'train_runtime': 1999.0385, 'train_samples_per_second': 3.377, 'train_steps_per_second': 0.026, 'train_loss': 10.94597919170673, 'epoch': 0.99}
+100%|██████████| 52/52 [33:19<00:00, 36.96s/it]100%|██████████| 52/52 [33:19<00:00, 38.44s/it]
+***** train metrics *****
+  epoch                    =     0.9858
+  total_flos               =        0GF
+  train_loss               =     10.946
+  train_runtime            = 0:33:19.03
+  train_samples            =       6750
+  train_samples_per_second =      3.377
+  train_steps_per_second   =      0.026
+2026-05-08 23:51:37 - INFO - __main__ - *** Training complete ***
+2026-05-08 23:51:37 - INFO - __main__ - *** Save model ***
+[INFO|trainer.py:3942] 2026-05-08 23:51:45,590 >> Saving model checkpoint to /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher
+[INFO|configuration_utils.py:423] 2026-05-08 23:51:45,592 >> Configuration saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/config.json
+[INFO|configuration_utils.py:909] 2026-05-08 23:51:45,592 >> Configuration saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/generation_config.json
+[INFO|modeling_utils.py:3048] 2026-05-08 23:51:57,001 >> The model is bigger than the maximum size per checkpoint (5GB) and is going to be split in 4 checkpoint shards. You can find where each parameters has been saved in the index located at /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/model.safetensors.index.json.
+[INFO|tokenization_utils_base.py:2500] 2026-05-08 23:51:57,003 >> tokenizer config file saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/tokenizer_config.json
+[INFO|tokenization_utils_base.py:2509] 2026-05-08 23:51:57,004 >> Special tokens file saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/special_tokens_map.json
+2026-05-08 23:51:57 - INFO - __main__ - Model saved to /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher
+[INFO|modelcard.py:449] 2026-05-08 23:51:57,491 >> Dropping the following result as it does not have all the necessary fields:
+{'task': {'name': 'Causal Language Modeling', 'type': 'text-generation'}, 'dataset': {'name': 'argilla/dpo-mix-7k', 'type': 'argilla/dpo-mix-7k'}}
+[INFO|configuration_utils.py:423] 2026-05-08 23:51:57,492 >> Configuration saved in /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher/config.json
+2026-05-08 23:51:57 - INFO - __main__ - *** Training complete! ***

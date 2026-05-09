@@ -162,6 +162,15 @@ class ModelArguments:
             )
         },
     )
+    attn_implementation: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "Attention implementation for transformers (e.g. 'eager', 'sdpa', 'flash_attention_2'). "
+                "If None, transformers picks the best available."
+            )
+        },
+    )
     use_peft: bool = field(
         default=False,
         metadata={"help": ("Whether to use PEFT or not for training.")},
