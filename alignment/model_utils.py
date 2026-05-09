@@ -73,6 +73,7 @@ def get_tokenizer(
         else model_args.tokenizer_name_or_path,
         revision=model_args.model_revision,
         trust_remote_code=model_args.trust_remote_code,
+        local_files_only=True,
     )
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -113,7 +114,7 @@ def is_adapter_model(model_name_or_path: str, revision: str = "main") -> bool:
     try:
         # Try first if model on a Hub repo
         repo_files = list_repo_files(model_name_or_path, revision=revision)
-    except (HFValidationError, RepositoryNotFoundError):
+    except (HFValidationError, RepositoryNotFoundError, Exception):
         # If not, check local repo
         repo_files = os.listdir(model_name_or_path)
     return "adapter_model.safetensors" in repo_files or "adapter_model.bin" in repo_files
