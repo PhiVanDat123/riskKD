@@ -1,13 +1,19 @@
 #alpha 수정 버전. 원래 RQ_ref_from_dpo는 이 세팅이 맞음.
 #alpha는 run_distil_dpo 내부라서 처리가 귀찮아서 그냥 여기서 처리해버림
+# TVKD baseline: DPO machinery (~0) + light token-level KD + Q-adapter teacher-value shaping.
+# Mirrors the riskKD setup (1B SFT student, 8B DPO teacher as frozen ref, ultrafeedback)
+# minus the Ra-DPO / CVaR term. Requires the precomputed teacher distributions in the
+# `ultrafeedback-dckd` dataset (because distillation_weight > 0).
+
 # Model arguments
-model_name_or_path: /home/minchan.kwon/ADPA/model/dpo_student
+model_name_or_path: vukien2301/llama-3.2-1b-deita-sft-student
+ref_model_name_or_path: /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher_epoch1
 torch_dtype: bfloat16
 
 # Data training arguments
 # For definitions, see: src/h4/training/config.py
 dataset_mixer:
-  /home/minchan.kwon/ADPA/data/llama3.2-1b-deita-dpomix/dpomix7k-dckd: 1.0
+  /root/riskKD/data/llama3.2-1b-deita-dpomix/ultrafeedback-dckd: 1.0
 dataset_splits:
 - train
 preprocessing_num_workers: 12
@@ -15,20 +21,20 @@ preprocessing_num_workers: 12
 # DPOTrainer arguments
 bf16: true
 do_eval: false
-gradient_accumulation_steps: 16
+gradient_accumulation_steps: 1
 gradient_checkpointing: true
 gradient_checkpointing_kwargs:
   use_reentrant: False
 learning_rate: 5.0e-7
 log_level: info
 logging_steps: 1
-lr_scheduler_type: cosine
-max_length: 2048
-max_prompt_length: 1800
-num_train_epochs: 5
+lr_scheduler_type: constant
+max_length: 512
+max_prompt_length: 256
+num_train_epochs: 1
 optim: adamw_torch
-output_dir: /home/minchan.kwon/ADPA/model/TVKD
-per_device_train_batch_size: 1
+output_dir: /home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/TVKD_output
+per_device_train_batch_size: 8
 push_to_hub: false
 save_strategy: "steps"
 save_steps: 300
@@ -37,7 +43,6 @@ seed: 42
 warmup_ratio: 0.1
 dataset_num_proc: 64
 beta: 0.01
-
 
 # DPO
 sft_on_chosen: 0.0
@@ -59,3 +64,6 @@ qadapter_alpha_tilde: 1.0
 qadapter_alpha: 0.7
 qadapter_alpha_1: 0.0
 qadapter_softvalue_type: "entropy"
+
+#wandb
+report_to: none
