@@ -41,7 +41,49 @@ Results pulled to `results/eval/` (`SUMMARY.md` + per-task JSONs).
 
 Ra-DPO / ARR with a 1B student and 8B teacher is **numerically unstable**: `radpo_kl/chosen` and `radpo_kl/rejected` stayed ~800–1600 throughout (should be single digits), `radpo_rewards/margins` flipped sign, accuracies hovered at the 0.5 random baseline. Cause: the policy (1B) cannot match the reference (8B) distribution → the log-ratio `log(π_θ/π_tch)` is huge and noisy → the CVaR risk term swamps the preference signal. Loss only converged late and noisily (train_loss=5.40). Decision: **keep the 1B/8B setup** (it's a real, reportable finding) and try to **stabilize via token-level weighting** rather than changing the model pair.
 
-## ⏳ NEXT EXPERIMENT — kl_inv token weighting (implemented, not yet launched; box was down)
+## ✅ DONE — kl_inv token weighting (α=1.0, 1 epoch)
+
+Implemented and run. Token weighting **fixed the cross-size training instability**:
+
+| Metric | no-weight (1ep) | **token-wt α=1.0 (1ep)** |
+|---|---|---|
+| `train_loss` (run-avg) | 5.40 | **0.98** |
+| `radpo_kl/chosen` (mid-run) | ~1200–1600 | **~16–50** |
+| `radpo_rewards/margins` | flips sign, mostly negative | **consistently positive (+0.5 to +1.9)** |
+| `radpo_rewards/accuracies` | ~0.375 (below baseline) | **0.5–0.75 (above baseline)** |
+
+**Benchmark eval** (lm-eval, vLLM TP=8):
+
+| Benchmark | no-weight (1ep) | token-wt α=1.0 (1ep) | Δ |
+|---|---|---|---|
+| MMLU | 34.38% | 33.78% | −0.60 |
+| TruthfulQA-MC2 | 49.06% | 48.14% | −0.92 |
+| Winogrande | 60.85% | 61.80% | +0.95 |
+| HellaSwag (acc_norm) | 67.74% | 67.82% | +0.08 |
+| GSM8K (strict) | 3.94% | 6.22% | **+2.28** |
+| ARC-C (acc_norm) | 38.74% | 41.13% | **+2.39** |
+| **Average** | **42.45%** | **43.15%** | **+0.70** |
+
+**Read:** modest net +0.70 avg, concentrated on the reasoning-ish tasks (GSM8K, ARC). Knowledge/recall tasks unchanged-to-slightly-down (within noise). The token weighting's clear win is *making riskKD trainable at all in the cross-size case* (KL 1000+→~30, loss 5.4→0.98) — that's a methods contribution even if the benchmark table is near-flat. Model saved at `riskKD_output_tokenwt/` (not pushed to HF).
+
+Implementation: `CustomDPOConfig` has `radpo_token_weight_mode` (`"none"`|`"kl_inv"`) + `radpo_token_weight_alpha`. In `_radpo_get_batch_logps`, `kl_inv` mode builds `w_t = exp(-α · per_position_KL_t.detach())`. NOTE: α=1.0 is right because per-token KL is ~0.5–5 (NOT the summed-sequence KL ~1000 — α=0.001 was a no-op).
+
+## ⏳ NEXT EXPERIMENT — 3-epoch token-weighted riskKD (launched but box died ~immediately; needs relaunch)
+
+`riskKD.yaml` updated locally: `num_train_epochs: 3`, `save_strategy: "epoch"` (so we get checkpoint-902/1804/2706 — one per epoch, can eval the trajectory), `output_dir: .../riskKD_output_tokenwt_3ep`. Everything else unchanged (α=1.0 kl_inv, 8B `dpo_teacher_epoch1` ref, ultrafeedback, β=0.1, lr=5e-7 const, max_len=512, bsz=8). ~2706 steps × ~2.1 s/step ≈ ~95 min.
+
+**To relaunch when box returns:**
+```bash
+scp -P 32305 recipes/.../riskKD.yaml root@<box>:/root/riskKD/recipes/llama3.2-1b-deita-dpomix/
+ssh ... 'cd /root/riskKD && source .venv/bin/activate && export HF_TOKEN=$(cat /workspace/.hf_home/token) && \
+  setsid bash -c "HF_TOKEN=$HF_TOKEN HF_HUB_OFFLINE=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+    CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 ACCELERATE_LOG_LEVEL=info DS_SKIP_CUDA_CHECK=1 \
+    nohup python -m accelerate.commands.launch --config_file recipes/accelerate_config/deepspeed_zero3.yaml \
+    scripts/run_distill_dpo.py recipes/llama3.2-1b-deita-dpomix/riskKD.yaml > logs/riskKD_tokenwt_3ep.log 2>&1 < /dev/null" & disown -a'
+```
+Then set up the auto-eval watcher (MUST `cd /root/riskKD` first so the `logs/` redirect resolves) — wait for the training PID to disappear, then `bash eval_script/all.sh /home/.../riskKD_output_tokenwt_3ep`.
+
+### --- old: kl_inv NEXT-EXPERIMENT section (kept for reference) ---
 
 **Idea** (from `proposals/loss-weighting.md` #4a): downweight tokens where policy & teacher disagree wildly — the cross-size noise tokens — inside the Ra-DPO loss.
 
