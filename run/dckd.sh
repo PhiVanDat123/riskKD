@@ -25,7 +25,10 @@ MERGED_OUT="${OUTDIR}/ultrafeedback-dckd"                                       
 GPUS="0,1,2,3,4,5,6,7"
 NPROC=8
 PORT=29501
-MAX_TOK_PER_BATCH=2048
+# 8B teacher in bf16 (~16GB) on 144GB H200s -> tons of headroom; pack many sequences
+# per batch instead of the upstream 1-seq-at-a-time default.
+MAX_TOK_PER_BATCH=16384
+MAX_BATCH_SIZE=48
 PAD_TOKEN_ID=128001                                                                   # Llama-3 <|end_of_text|>
 
 # Llama-3 chat-format delimiters (the precompute wraps each turn with these)
@@ -88,7 +91,8 @@ precompute () {
   --assistant-end '${A_END}' \
   --save-to ${SAVE_TO} \
   --pad-token-id ${PAD_TOKEN_ID} \
-  --max-tokens-per-batch ${MAX_TOK_PER_BATCH}"
+  --max-tokens-per-batch ${MAX_TOK_PER_BATCH} \
+  --max-batch-size ${MAX_BATCH_SIZE}"
   log_and_run "rm_${SPLIT}_${KEY}_temp" "rm -f ${SAVE_TO}/results_rank_*.jsonl"
 }
 
