@@ -349,7 +349,13 @@ def main():
     parser.add_argument('--pad-token-id', type=int, default=None,
                         help="Token ID used for padding. If not set, the tokenizer's pad_token_id is used.")
     parser.add_argument('--conversation-key', type=str, required=True,
-                        help="Key to access conversation data within the dataset.")
+                        help="Key to access conversation data within the dataset. The value may be either an "
+                             "OpenAI-style list of {role, content} dicts, or a plain response string (in which "
+                             "case --prompt-key is used to build the [user, assistant] conversation).")
+    parser.add_argument('--prompt-key', type=str, default='prompt',
+                        help="Column holding the prompt, used only when --conversation-key points at plain "
+                             "response strings (e.g. pvdhihihi/ultra-feedback). May itself be a string or an "
+                             "OpenAI-style message list.")
     parser.add_argument('--save-to', type=str, required=True,
                         help="Directory to save the processed results.")
     parser.add_argument('--user-begin', default="", type=lambda s: s.replace('\\n', '\n'),
@@ -377,9 +383,35 @@ def main():
     pad_token_id: int = args.pad_token_id if args.pad_token_id is not None else tokenizer.pad_token_id
     logits_extractor = LogitsExtractor(load_from=args.model)
 
+    def _is_message_list(v):
+        return isinstance(v, list) and len(v) > 0 and isinstance(v[0], dict) and 'content' in v[0]
+
+    def _to_conversation(row):
+        """Normalize a row into an OpenAI-style [..., {role:assistant, content:response}] list.
+
+        Handles two dataset schemas:
+          - argilla/dpo-mix-7k style: row[conversation_key] is already a list of {role, content} dicts.
+          - pvdhihihi/ultra-feedback style: row[conversation_key] is a plain response string and the prompt
+            lives in row[prompt_key] (as a string or its own message list).
+        """
+        conv = row[args.conversation_key]
+        if _is_message_list(conv):
+            return conv
+        if isinstance(conv, str):
+            prompt = row.get(args.prompt_key, "")
+            if _is_message_list(prompt):
+                prompt_messages = list(prompt)
+            else:
+                prompt_messages = [{"role": "user", "content": str(prompt) if prompt is not None else ""}]
+            return prompt_messages + [{"role": "assistant", "content": conv}]
+        raise ValueError(
+            f"Don't know how to interpret column '{args.conversation_key}' (type {type(conv).__name__}); "
+            f"expected an OpenAI-style message list or a response string."
+        )
+
     dataset_list = [{
         'index': row['index'] if 'index' in row else i,
-        args.conversation_key: row[args.conversation_key]
+        args.conversation_key: _to_conversation(row)
     } for i, row in enumerate(dataset)]
 
     with accelerator.split_between_processes(dataset_list) as dataset_split:

@@ -1,0 +1,16 @@
+group: leaderboard_custom
+task:
+  - task: mmlu
+    num_fewshot: 5
+  - task: truthfulqa_mc2
+    num_fewshot: 0
+  - task: winogrande
+    num_fewshot: 5
+  - task: hellaswag
+    num_fewshot: 10
+  - task: gsm8k
+    num_fewshot: 5
+  - task: arc_challenge
+    num_fewshot: 25
+metadata:
+  version: 1.0
