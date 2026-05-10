@@ -198,6 +198,12 @@ class CustomDPOConfig(TrainingArguments):
     is_cal_risk_distribution_logps: Optional[bool] = field(default=False, metadata={"help": "Use risk distribution logps variant for CVaR if True."})
     radpo_token_weight_mode: Optional[str] = field(default="none", metadata={"help": "Token-level weighting inside Ra-DPO: 'none' or 'kl_inv' (w_t = exp(-alpha * per_position_KL_t))."})
     radpo_token_weight_alpha: Optional[float] = field(default=0.0, metadata={"help": "Alpha for kl_inv token weighting. Larger => more aggressive downweighting of high-KL tokens."})
+    # Annealed risk operator mu (= the CVaR confidence_level). If both _start and _end are set,
+    # confidence_level is linearly interpolated from _start (at step 0) to _end (by _frac of total
+    # training steps). If unset, the fixed `radpo_confidence_level` is used (no annealing).
+    radpo_mu_anneal_start: Optional[float] = field(default=None, metadata={"help": "Starting CVaR confidence_level for the mu schedule (None disables annealing)."})
+    radpo_mu_anneal_end: Optional[float] = field(default=None, metadata={"help": "Ending CVaR confidence_level for the mu schedule (None disables annealing)."})
+    radpo_mu_anneal_frac: Optional[float] = field(default=1.0, metadata={"help": "Fraction of total training steps over which mu anneals from _start to _end."})
 
     # Copy From DPOConfig
     learning_rate: float = 1e-6
@@ -1625,9 +1631,21 @@ class DistillTrainer(Trainer):
         else:
             concatenated_weights = None
 
+        # Annealed risk operator mu (= CVaR confidence_level). If both anneal endpoints are set,
+        # interpolate linearly from _start (step 0) to _end (by _frac of total steps); else fixed.
+        mu = self.args.radpo_confidence_level
+        ms = getattr(self.args, "radpo_mu_anneal_start", None)
+        me = getattr(self.args, "radpo_mu_anneal_end", None)
+        if ms is not None and me is not None:
+            total_steps = max(1, int(getattr(self.state, "max_steps", 0) or 1))
+            anneal_frac = max(1e-6, getattr(self.args, "radpo_mu_anneal_frac", 1.0))
+            prog = min(1.0, float(getattr(self.state, "global_step", 0)) / (total_steps * anneal_frac))
+            mu = ms + prog * (me - ms)
+        self._current_radpo_mu = mu  # exposed for metric logging in get_batch_loss_metrics
+
         all_logps_margin, all_position_kl, all_position_risk_ratio, all_logps = _radpo_get_batch_logps(
             all_logits, ref_all_logits, labels, concatenated_weights,
-            confidence_level=self.args.radpo_confidence_level,
+            confidence_level=mu,
             is_split_risk_ratio=self.args.is_split_risk_ratio,
             is_cal_risk_distribution_logps=self.args.is_cal_risk_distribution_logps,
             average_log_prob=False,
@@ -1759,6 +1777,7 @@ class DistillTrainer(Trainer):
             metrics[f"{prefix}radpo_kl/rejected"] = rejected_position_kl.detach().mean().cpu()
             metrics[f"{prefix}radpo_risk/chosen"] = chosen_position_risk_ratio.detach().mean().cpu()
             metrics[f"{prefix}radpo_risk/rejected"] = rejected_position_risk_ratio.detach().mean().cpu()
+            metrics[f"{prefix}radpo_mu"] = float(getattr(self, "_current_radpo_mu", self.args.radpo_confidence_level))
 
         #PART2.5 : Reference regularizer
         if self.args.kl_student_weight>0:
