@@ -31,18 +31,18 @@ if __name__ == '__main__':
     parser.add_argument('--input-dataset-dict', type=str)
     parser.add_argument('--teacher-chosen-logp-train', type=str)
     parser.add_argument('--teacher-rejected-logp-train', type=str)
-    parser.add_argument('--teacher-chosen-logp-test', type=str)
-    parser.add_argument('--teacher-rejected-logp-test', type=str)
+    parser.add_argument('--teacher-chosen-logp-test', type=str, default=None)
+    parser.add_argument('--teacher-rejected-logp-test', type=str, default=None)
     parser.add_argument('--save-to', type=str)
     args = parser.parse_args()
 
-    # Load datasets
-    chosen_teacher_logp = {
-        "train": load_from_disk(args.teacher_chosen_logp_train).to_iterable_dataset(),
-        "test": load_from_disk(args.teacher_chosen_logp_test).to_iterable_dataset()}
-    rejected_teacher_logp = {
-        "train": load_from_disk(args.teacher_rejected_logp_train).to_iterable_dataset(),
-        "test": load_from_disk(args.teacher_rejected_logp_test).to_iterable_dataset()}
+    # Load per-split teacher logp datasets. The test split is optional — some
+    # datasets (e.g. a train-only ultrafeedback) don't have one.
+    chosen_teacher_logp = {"train": load_from_disk(args.teacher_chosen_logp_train).to_iterable_dataset()}
+    rejected_teacher_logp = {"train": load_from_disk(args.teacher_rejected_logp_train).to_iterable_dataset()}
+    if args.teacher_chosen_logp_test and args.teacher_rejected_logp_test:
+        chosen_teacher_logp["test"] = load_from_disk(args.teacher_chosen_logp_test).to_iterable_dataset()
+        rejected_teacher_logp["test"] = load_from_disk(args.teacher_rejected_logp_test).to_iterable_dataset()
 
     # Initialize the result dataset dictionary
     try:
@@ -51,8 +51,9 @@ if __name__ == '__main__':
         dataset_path = os.path.join(args.input_dataset_dict)
         rst: DatasetDict = load_from_disk(dataset_path)
 
-    # Process both train and test splits in parallel
-    for split in ["test", "train"]:
+    # Process only the splits we have teacher logits for (and that exist in the input dataset)
+    splits = [s for s in ("test", "train") if s in chosen_teacher_logp and s in rst]
+    for split in splits:
         new_dataset = merge_logits(chosen_teacher_logp, rejected_teacher_logp, split, rst[split])
         rst[split] = new_dataset
 
