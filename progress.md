@@ -111,16 +111,26 @@ Then eval with `bash eval_script/all.sh /home/.../riskKD_output_tokenwt` and pul
 
 **Success criteria:** `radpo_kl/*` should drop well below the ~1000 we saw; `radpo_rewards/margins` should stay positive; `radpo_rewards/accuracies` should rise above 0.5; benchmark scores should be ≥ the no-weighting riskKD run (especially TruthfulQA).
 
-## Other queued / candidate experiments
+## Improvement ideas (prioritized)
 
-1. **α sweep for kl_inv** — once 0.001 is validated, try {0.0005, 0.002, 0.005} to see how much attenuation is optimal.
-2. **`pos_decay` token weighting** — `w_t = γ^(L-t)`, emphasize later (substantive) tokens. Alternative to kl_inv.
-3. **Teacher-temperature softening** — divide teacher logits by T>1 in `_radpo_get_batch_logps` before the softmax. Smooths the 8B's peaks so the 1B can track. Single hyperparameter; not yet implemented.
-4. **Baselines for the paper's experiments table** (none run yet):
-   - DPO baseline: 1B `student_sft_init` → standard DPO on ultrafeedback, no teacher.
-   - TVKD baseline: `qadapter_distil_weight=1`, `radpo_weight=0`, 8B teacher ref — the expectation-based teacher value shaping (the original TVKD method).
-   - Ra-DPO-without-teacher: `radpo_weight=1` but `ref_model = student_sft_init` (the student's own SFT) instead of the 8B teacher.
-5. **Eval the alignment objective, not just knowledge** — AlpacaEval 2 / MT-Bench win-rate. lm-eval benchmarks (MMLU etc.) barely move under DPO by design; the thing ARR actually targets is instruction-following quality. (Lower priority per current decision to keep the existing benchmark suite, but worth noting.)
+Rating key — **P0** = do next / highest-leverage, **P1** = strong, do soon, **P2** = worthwhile, **P3** = nice-to-have / situational. "Methods" = changes the paper's contribution; "Exp" = a run/ablation, no method change.
+
+| # | Idea | Type | Priority | Notes |
+|---|---|---|---|---|
+| 1 | **Derive the per-token weights from the augmented Pb-MDP** — the paper already has unspecified `w_t` in Eq. 10 (`w^w_i`, `w^l_j`) and Eq. 12. Argue those `w_t` ARE the importance-sampling correction the framework requires (since π_θ≠π_tch, any expectation under π_tch evaluated on π_θ's trajectory needs an IS weight; under a KL-trust-region assumption it reduces to `exp(-α·KL_t)`). Turns "we added a heuristic" → "the per-token weights in the ARR objective are the natural IS correction, which makes large-capacity-gap distillation tractable." The empirical KL 1000+→~30 / loss 5.4→0.98 result is the *evidence*. | Methods | **P0** | Biggest single win for the paper. No new code — reframes the existing `kl_inv` weighting as theory. |
+| 2 | **Unify the token weighting with ARR's KL regularizer** — ARR has `−β·KL(π_θ‖π_tch)` (Eq. 5). The `exp(-α·KL_t)` weighting is *also* about KL. Frame as **per-token trust region**: only trust the teacher's value guidance where the student is close enough to act on it. One coherent mechanism instead of "global KL penalty + separate per-token hack." | Methods | **P0** | Pairs with #1. Strengthens the narrative; possibly lets you drop the global β in favor of the per-token treatment (ablate). |
+| 5 | **Adaptive / annealed risk operator μ** — `radpo_confidence_level` is fixed at 0.99 (extreme tail-focus). Early in training (student far from teacher) aggressive risk-aversion is counterproductive. Anneal μ: start near risk-neutral, become risk-averse as training progresses (or make μ state-dependent). Fits the "nested" framing, gives a curriculum, clean ablation (static vs annealed μ). | Methods + Exp | **P0** | Needs a small code change: thread a μ-schedule into `_calculate_cvar_radpo` via a step-fraction. New YAML fields like `radpo_mu_anneal_start`, `radpo_mu_anneal_end`. |
+| 6a | **3-epoch token-weighted run** — `riskKD.yaml` already updated (3 ep, `save_strategy: epoch` → per-epoch ckpts, `output_dir: riskKD_output_tokenwt_3ep`). Launched once, box died; needs relaunch. ~95 min. | Exp | **P1** | Cheapest concrete next run. Lets the preference signal accumulate; per-epoch ckpts show the trajectory. |
+| 6b | **α sweep for kl_inv** — {0.5, 1.0, 2.0, 5.0}. α=1.0 worked; find the attenuation knee (too-small = no-op like α=0.001 was; too-large = throws away signal). | Exp | **P1** | ~30 min each; run after 6a. |
+| 4t | **Better teacher → better value function** — `dpo_teacher_epoch1` was DPO'd from an *epoch-1 SFT whose held-out loss was rising* — mediocre teacher. Paper's own Limitations: "quality of the shaping signal depends on reliability of teacher value estimates." Re-DPO the 8B from a properly-trained SFT (the 3-epoch one or better) → bigger `Ṽ_πtch` quality → bigger transferred signal → benchmark deltas that actually show. | Exp | **P1** | ~30 min to re-DPO + the riskKD re-run. Most likely to move the benchmark table. |
+| 3t | **3B-teacher → 1B-student ablation** — the 8B→1B explosion *is* the large-capacity-gap problem; token weighting treats the symptom. Use `meta-llama/Llama-3.2-3B-Instruct` (or DPO a 3B) as teacher; ARR should work *directly* (KL bounded). Story becomes: "ARR works directly at moderate gaps; the IS-weighted variant extends it to large gaps." | Exp | **P2** | Needs a 3B teacher (download Instruct, or DPO). Cleaner result than "8B→1B with a fix." |
+| 6c | **Surgical weighting** — weight the *risk correction δ* by `exp(-α·KL)` but leave the *utility gap u* unweighted (the DPO signal is fine; only the risk-operator-on-garbage needs damping). More targeted than the current "multiply every per-token term uniformly." | Methods + Exp | **P2** | Small code change in `radpo_loss_fn` / `_radpo_get_batch_logps` — separate the weight applied to risk-ratio vs margin terms. Quick ablation. |
+| 3p | **`pos_decay` token weighting** — `w_t = γ^(L-t)`, emphasize later (substantive) tokens. Alternative to `kl_inv`. | Exp | **P3** | Already mostly plumbed (the `radpo_token_weight_mode` enum) — would just need a `pos_decay` branch. |
+| 3s | **Teacher-temperature softening** — divide teacher logits by T>1 in `_radpo_get_batch_logps` before the softmax. Smooths the 8B's peaks so the 1B can track. Single hyperparameter; orthogonal to token weighting (could stack). | Exp | **P3** | Not implemented. ~5-line change. |
+| Bx | **Paper baselines** (none run yet): DPO on student (no teacher); TVKD (`qadapter_distil_weight=1`, `radpo_weight=0`); Ra-DPO-without-teacher (`ref = student_sft_init`). Needed for a complete experiments table regardless of method improvements. | Exp | **P1** | ~30 min each. |
+| Ev | **Eval alignment quality (AlpacaEval 2 / MT-Bench win-rate)** — lm-eval benchmarks barely move under DPO by design; ARR targets instruction-following. Currently flying blind on the actual objective. | Exp | **P2** (user has opted to keep the lm-eval suite for now) | Would back the "ARR improves alignment" claim that the benchmark table can't. |
+
+**Recommended order:** #1 + #2 + #5 (methods reframing + annealed μ code) → 6a (3-epoch run, already queued) → 4t (better teacher) → 6b (α sweep) → Bx (baselines). #1 and #2 are pure writing/reframing; #5 needs a small code change; the rest are runs.
 
 ## Repo state
 
