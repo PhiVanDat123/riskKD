@@ -196,6 +196,8 @@ class CustomDPOConfig(TrainingArguments):
     if_radpo2: Optional[bool] = field(default=False, metadata={"help": "Use Ra-DPO2 (detached chosen risk) if True, else Ra-DPO1."})
     is_split_risk_ratio: Optional[bool] = field(default=True, metadata={"help": "Split vocab into two halves for CVaR if True."})
     is_cal_risk_distribution_logps: Optional[bool] = field(default=False, metadata={"help": "Use risk distribution logps variant for CVaR if True."})
+    radpo_token_weight_mode: Optional[str] = field(default="none", metadata={"help": "Token-level weighting inside Ra-DPO: 'none' or 'kl_inv' (w_t = exp(-alpha * per_position_KL_t))."})
+    radpo_token_weight_alpha: Optional[float] = field(default=0.0, metadata={"help": "Alpha for kl_inv token weighting. Larger => more aggressive downweighting of high-KL tokens."})
 
     # Copy From DPOConfig
     learning_rate: float = 1e-6
@@ -543,7 +545,8 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
                            labels: torch.LongTensor, weights: torch.FloatTensor = None,
                            confidence_level: float = 0.5, is_split_risk_ratio: bool = True,
                            is_cal_risk_distribution_logps: bool = False,
-                           average_log_prob: bool = False):
+                           average_log_prob: bool = False,
+                           token_weight_mode: str = "none", token_weight_alpha: float = 0.0):
     """Compute logps margin, KL divergence, and CVaR risk ratio for Ra-DPO."""
     assert logits.shape[:-1] == labels.shape
     assert reference_logits.shape[:-1] == labels.shape
@@ -578,7 +581,12 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
     logps_margin = per_token_logps - per_reference_token_logps
 
     if weights is None:
-        weights = torch.ones_like(logps_margin)
+        if token_weight_mode == "kl_inv" and token_weight_alpha > 0:
+            # Downweight tokens where policy & reference disagree wildly (the cross-size noise).
+            # per_position_kl is already [B, T-1] (computed on the sliced labels above).
+            weights = torch.exp(-token_weight_alpha * per_position_kl.detach())
+        else:
+            weights = torch.ones_like(logps_margin)
     else:
         weights = weights[:, 1:].clone()
 
@@ -1623,6 +1631,8 @@ class DistillTrainer(Trainer):
             is_split_risk_ratio=self.args.is_split_risk_ratio,
             is_cal_risk_distribution_logps=self.args.is_cal_risk_distribution_logps,
             average_log_prob=False,
+            token_weight_mode=getattr(self.args, "radpo_token_weight_mode", "none"),
+            token_weight_alpha=getattr(self.args, "radpo_token_weight_alpha", 0.0),
         )
 
         return (
