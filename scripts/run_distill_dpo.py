@@ -196,8 +196,11 @@ class CustomDPOConfig(TrainingArguments):
     if_radpo2: Optional[bool] = field(default=False, metadata={"help": "Use Ra-DPO2 (detached chosen risk) if True, else Ra-DPO1."})
     is_split_risk_ratio: Optional[bool] = field(default=True, metadata={"help": "Split vocab into two halves for CVaR if True."})
     is_cal_risk_distribution_logps: Optional[bool] = field(default=False, metadata={"help": "Use risk distribution logps variant for CVaR if True."})
+    radpo_keep_ref_model: Optional[bool] = field(default=True, metadata={"help": "Keep/use the explicit reference model for Ra-DPO even when dpo_weight is 0."})
     radpo_token_weight_mode: Optional[str] = field(default="none", metadata={"help": "Token-level weighting inside Ra-DPO: 'none' or 'kl_inv' (w_t = exp(-alpha * per_position_KL_t))."})
     radpo_token_weight_alpha: Optional[float] = field(default=0.0, metadata={"help": "Alpha for kl_inv token weighting. Larger => more aggressive downweighting of high-KL tokens."})
+    radpo_token_weight_normalize: Optional[bool] = field(default=False, metadata={"help": "Normalize token weights per sequence to keep the effective Ra-DPO loss scale stable."})
+    radpo_token_weight_target: Optional[str] = field(default="all", metadata={"help": "Where to apply token weights inside Ra-DPO: 'all' or 'risk' (risk correction only)."})
     # Annealed risk operator mu (= the CVaR confidence_level). If both _start and _end are set,
     # confidence_level is linearly interpolated from _start (at step 0) to _end (by _frac of total
     # training steps). If unset, the fixed `radpo_confidence_level` is used (no annealing).
@@ -552,7 +555,9 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
                            confidence_level: float = 0.5, is_split_risk_ratio: bool = True,
                            is_cal_risk_distribution_logps: bool = False,
                            average_log_prob: bool = False,
-                           token_weight_mode: str = "none", token_weight_alpha: float = 0.0):
+                           token_weight_mode: str = "none", token_weight_alpha: float = 0.0,
+                           token_weight_normalize: bool = False,
+                           token_weight_target: str = "all"):
     """Compute logps margin, KL divergence, and CVaR risk ratio for Ra-DPO."""
     assert logits.shape[:-1] == labels.shape
     assert reference_logits.shape[:-1] == labels.shape
@@ -565,8 +570,8 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
     labels[labels == -100] = 0
 
     distribution_logps = logits.float().log_softmax(-1)
-    reference_distribution_ps = reference_logits.float().softmax(-1)
-    reference_distribution_logps = reference_distribution_ps.log()
+    reference_distribution_logps = reference_logits.float().log_softmax(-1)
+    reference_distribution_ps = reference_distribution_logps.exp()
 
     per_position_kl = (reference_distribution_ps * (reference_distribution_logps - distribution_logps)).sum(-1)
 
@@ -596,20 +601,44 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
     else:
         weights = weights[:, 1:].clone()
 
+    mean_token_weight = (weights * loss_mask).sum(-1) / loss_mask.sum(-1).clamp_min(1)
+    effective_token_count = (weights * loss_mask).sum(-1)
+
+    if token_weight_normalize:
+        valid_count = loss_mask.sum(-1, keepdim=True).clamp_min(1)
+        weight_sum = (weights * loss_mask).sum(-1, keepdim=True).clamp_min(1e-8)
+        weights = weights * valid_count / weight_sum
+
+    if token_weight_target not in ("all", "risk"):
+        raise ValueError(f"Unsupported radpo_token_weight_target={token_weight_target!r}; expected 'all' or 'risk'.")
+
+    margin_weights = weights if token_weight_target == "all" else torch.ones_like(weights)
+    risk_weights = weights
+    logp_weights = weights if token_weight_target == "all" else torch.ones_like(weights)
+
+    raw_position_kl = (per_position_kl * loss_mask).sum(-1)
+    weighted_position_kl = (per_position_kl * weights * loss_mask).sum(-1)
+
     if average_log_prob:
-        denom = loss_mask.sum(-1)
+        denom = loss_mask.sum(-1).clamp_min(1)
         return (
-            (logps_margin * weights * loss_mask).sum(-1) / denom,
-            (per_position_kl * weights * loss_mask).sum(-1) / denom,
-            (per_position_risk_ratio * weights * loss_mask).sum(-1) / denom,
-            (per_token_logps * weights * loss_mask).sum(-1) / denom,
+            (logps_margin * margin_weights * loss_mask).sum(-1) / denom,
+            weighted_position_kl / denom,
+            raw_position_kl / denom,
+            (per_position_risk_ratio * risk_weights * loss_mask).sum(-1) / denom,
+            (per_token_logps * logp_weights * loss_mask).sum(-1) / denom,
+            mean_token_weight,
+            effective_token_count,
         )
     else:
         return (
-            (logps_margin * weights * loss_mask).sum(-1),
-            (per_position_kl * weights * loss_mask).sum(-1),
-            (per_position_risk_ratio * weights * loss_mask).sum(-1),
-            (per_token_logps * weights * loss_mask).sum(-1),
+            (logps_margin * margin_weights * loss_mask).sum(-1),
+            weighted_position_kl,
+            raw_position_kl,
+            (per_position_risk_ratio * risk_weights * loss_mask).sum(-1),
+            (per_token_logps * logp_weights * loss_mask).sum(-1),
+            mean_token_weight,
+            effective_token_count,
         )
 
 
@@ -655,10 +684,22 @@ class DistillTrainer(Trainer):
             preprocess_logits_for_metrics: Optional[Callable[[torch.Tensor, torch.Tensor], torch.Tensor]] = None,
             peft_config: Optional[dict] = None,
     ):
-        if args.dpo_weight == 0:
+        needs_radpo_ref_model = (
+            getattr(args, "radpo_weight", 0) > 0
+            and getattr(args, "radpo_keep_ref_model", True)
+            and not args.reference_free
+        )
+        needs_dpo_ref_model = args.dpo_weight != 0 and not args.reference_free
+        needs_explicit_ref_model = needs_dpo_ref_model or needs_radpo_ref_model
+
+        if not needs_explicit_ref_model:
             ref_model = None
         else:
-            if "ref_chosen_logps" in train_dataset.column_names and "ref_rejected_logps" in train_dataset.column_names:
+            if (
+                not needs_radpo_ref_model
+                and "ref_chosen_logps" in train_dataset.column_names
+                and "ref_rejected_logps" in train_dataset.column_names
+            ):
                 ref_model = None
             elif args.reference_free:
                 ref_model = None
@@ -691,7 +732,7 @@ class DistillTrainer(Trainer):
                     )
                 model_init_kwargs["torch_dtype"] = torch_dtype
 
-        if args.ref_model_init_kwargs is None or self.args.dpo_weight == 0:
+        if args.ref_model_init_kwargs is None or not needs_explicit_ref_model:
             ref_model_init_kwargs = {}
         elif not isinstance(ref_model, str):
             raise ValueError(
@@ -796,12 +837,16 @@ class DistillTrainer(Trainer):
         self.reference_free = args.reference_free
 
         self.ref_model = ref_model
-        if args.dpo_weight == 0:
+        if not needs_explicit_ref_model:
             self.ref_model = None
         else:
-            if "ref_chosen_logps" in train_dataset.column_names and "ref_rejected_logps" in train_dataset.column_names:
+            if (
+                not needs_radpo_ref_model
+                and "ref_chosen_logps" in train_dataset.column_names
+                and "ref_rejected_logps" in train_dataset.column_names
+            ):
                 self.ref_model = None
-            elif self.is_peft_model or args.precompute_ref_log_probs or args.reference_free:
+            elif not needs_radpo_ref_model and (self.is_peft_model or args.precompute_ref_log_probs or args.reference_free):
                 self.ref_model = None
             elif ref_model is None:
                 print('!!Createing reference model!!')
@@ -1590,9 +1635,11 @@ class DistillTrainer(Trainer):
 
         Returns:
             chosen_logps_margin, rejected_logps_margin,
-            chosen_position_kl, rejected_position_kl,
+            chosen_weighted_position_kl, rejected_weighted_position_kl,
+            chosen_raw_position_kl, rejected_raw_position_kl,
             chosen_position_risk_ratio, rejected_position_risk_ratio,
-            chosen_logps (detached), rejected_logps (detached)
+            chosen_logps (detached), rejected_logps (detached),
+            chosen/rejected mean token weights and effective token counts
         """
         compte_ref_context_manager = amp.autocast("cuda") if self._peft_has_been_casted_to_bf16 else nullcontext()
 
@@ -1643,7 +1690,15 @@ class DistillTrainer(Trainer):
             mu = ms + prog * (me - ms)
         self._current_radpo_mu = mu  # exposed for metric logging in get_batch_loss_metrics
 
-        all_logps_margin, all_position_kl, all_position_risk_ratio, all_logps = _radpo_get_batch_logps(
+        (
+            all_logps_margin,
+            all_weighted_position_kl,
+            all_raw_position_kl,
+            all_position_risk_ratio,
+            all_logps,
+            all_mean_token_weight,
+            all_effective_token_count,
+        ) = _radpo_get_batch_logps(
             all_logits, ref_all_logits, labels, concatenated_weights,
             confidence_level=mu,
             is_split_risk_ratio=self.args.is_split_risk_ratio,
@@ -1651,17 +1706,25 @@ class DistillTrainer(Trainer):
             average_log_prob=False,
             token_weight_mode=getattr(self.args, "radpo_token_weight_mode", "none"),
             token_weight_alpha=getattr(self.args, "radpo_token_weight_alpha", 0.0),
+            token_weight_normalize=getattr(self.args, "radpo_token_weight_normalize", False),
+            token_weight_target=getattr(self.args, "radpo_token_weight_target", "all"),
         )
 
         return (
             all_logps_margin[:num_examples],        # chosen_logps_margin
             all_logps_margin[num_examples:],        # rejected_logps_margin
-            all_position_kl[:num_examples],         # chosen_position_kl
-            all_position_kl[num_examples:],         # rejected_position_kl
+            all_weighted_position_kl[:num_examples], # chosen_weighted_position_kl
+            all_weighted_position_kl[num_examples:], # rejected_weighted_position_kl
+            all_raw_position_kl[:num_examples],     # chosen_raw_position_kl
+            all_raw_position_kl[num_examples:],     # rejected_raw_position_kl
             all_position_risk_ratio[:num_examples], # chosen_position_risk_ratio
             all_position_risk_ratio[num_examples:], # rejected_position_risk_ratio
             all_logps[:num_examples].detach(),      # chosen_logps
             all_logps[num_examples:].detach(),      # rejected_logps
+            all_mean_token_weight[:num_examples],   # chosen_mean_token_weight
+            all_mean_token_weight[num_examples:],   # rejected_mean_token_weight
+            all_effective_token_count[:num_examples], # chosen_effective_token_count
+            all_effective_token_count[num_examples:], # rejected_effective_token_count
         )
 
     @staticmethod
@@ -1755,9 +1818,12 @@ class DistillTrainer(Trainer):
         # PART2.2: Ra-DPO loss
         if self.args.radpo_weight > 0.0001:
             (chosen_logps_margin, rejected_logps_margin,
-             chosen_position_kl, rejected_position_kl,
+             chosen_weighted_position_kl, rejected_weighted_position_kl,
+             chosen_raw_position_kl, rejected_raw_position_kl,
              chosen_position_risk_ratio, rejected_position_risk_ratio,
-             radpo_chosen_logps, radpo_rejected_logps) = self.radpo_concatenated_forward(model, batch)
+             radpo_chosen_logps, radpo_rejected_logps,
+             chosen_mean_token_weight, rejected_mean_token_weight,
+             chosen_effective_token_count, rejected_effective_token_count) = self.radpo_concatenated_forward(model, batch)
 
             radpo_losses, radpo_chosen_rewards, radpo_rejected_rewards = radpo_loss_fn(
                 chosen_logps_margin, rejected_logps_margin,
@@ -1773,8 +1839,14 @@ class DistillTrainer(Trainer):
             metrics[f"{prefix}radpo_rewards/rejected"] = radpo_rejected_rewards.mean().cpu()
             metrics[f"{prefix}radpo_rewards/accuracies"] = radpo_reward_accuracies.mean().cpu()
             metrics[f"{prefix}radpo_rewards/margins"] = (radpo_chosen_rewards - radpo_rejected_rewards).mean().cpu()
-            metrics[f"{prefix}radpo_kl/chosen"] = chosen_position_kl.detach().mean().cpu()
-            metrics[f"{prefix}radpo_kl/rejected"] = rejected_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_kl/chosen"] = chosen_weighted_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_kl/rejected"] = rejected_weighted_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_raw_kl/chosen"] = chosen_raw_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_raw_kl/rejected"] = rejected_raw_position_kl.detach().mean().cpu()
+            metrics[f"{prefix}radpo_token_weight/chosen"] = chosen_mean_token_weight.detach().mean().cpu()
+            metrics[f"{prefix}radpo_token_weight/rejected"] = rejected_mean_token_weight.detach().mean().cpu()
+            metrics[f"{prefix}radpo_effective_tokens/chosen"] = chosen_effective_token_count.detach().mean().cpu()
+            metrics[f"{prefix}radpo_effective_tokens/rejected"] = rejected_effective_token_count.detach().mean().cpu()
             metrics[f"{prefix}radpo_risk/chosen"] = chosen_position_risk_ratio.detach().mean().cpu()
             metrics[f"{prefix}radpo_risk/rejected"] = rejected_position_risk_ratio.detach().mean().cpu()
             metrics[f"{prefix}radpo_mu"] = float(getattr(self, "_current_radpo_mu", self.args.radpo_confidence_level))
