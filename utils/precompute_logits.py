@@ -183,10 +183,13 @@ class LogitsExtractor:
         labels = torch.tensor(model_input['labels'], dtype=torch.long, device=self.device)
         attention_mask = torch.tensor(model_input['attention_mask'], dtype=torch.long, device=self.device)
 
-        # Forward pass through the model
+        # Forward pass through the model.
+        # NOTE: do NOT pass `labels` here — transformers would then compute (and discard)
+        # the cross-entropy loss, which upcasts the full [batch, seq, vocab] logits to fp32
+        # (~4 bytes/elem). For a padded batch that is tens of GB and was OOM-ing on big-vocab
+        # models. We only need `output.logits`, so skip the loss path entirely.
         output = self.model(
             input_ids=input_ids,
-            labels=labels,
             attention_mask=attention_mask,
             use_cache=False
         )

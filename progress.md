@@ -1,6 +1,35 @@
 # Progress — riskKD / Risk-Aware Preference Distillation experiments
 
-Last updated: 2026-05-10
+Last updated: 2026-05-12
+
+## 2026-05-12 — status: Qwen3 campaign paused; box idle (safe to stop the pod)
+
+**Box change:** moved off the 8× H200 vast.ai box. Current box = **RunPod 2× B200 (183 GB each)** — `ssh -p 32138 -i ~/.ssh/id_ed25519_2 root@38.80.152.146`, repo at `/workspace/riskKD` (NOT a git checkout — copied; `/workspace` is a RunPod MFS network volume, persists across pod *stop*, destroyed only on *terminate*; `/` is a 30 GB overlay). On-box `.venv`: torch 2.8.0+cu128, **transformers 4.51.3** (upgraded from 4.46.3 — Qwen3 needs ≥4.51), trl 0.12.0, wandb 0.26.1; separate `.venv-vllm` with vllm 0.20.2. W&B: project `riskKD-qwen3`, entity `vukien-2301-aarista` (key in `/workspace/.wandb_key`). HF tokens as before (`vukien2301/*` for pushes; `pvdhihihi` token for gated Llama; both in `/workspace/.hf_home/token`).
+
+**Nothing is running on the box** — the Qwen3-8B teacher SFT died during its save (below), no eval/training active, the monitoring cron is removed. **Safe to stop the pod now.** A *stop* keeps `/workspace` (repo + venv + HF cache + the broken checkpoint); the env is otherwise rebuildable via `run_box/box_setup2.sh` + HF re-download.
+
+### Llama-3.1-8B → Llama-3.2-1B baselines — DONE this campaign (pushed to HF, `vukien2301/*`)
+
+Teacher = `vukien2301/llama-3.1-8b-ultrafeedback-dpo-from-epoch1`, student init = `vukien2301/llama-3.2-1b-deita-sft-student`. 1 epoch UltraFeedback, effective batch 64, settings matched to TVKD. lm-eval 6-task leaderboard avg (**HF backend**, `--batch_size auto`):
+
+| Method | Avg | Recipe |
+|---|---|---|
+| TVKD | 40.96 | `recipes/llama3.2-1b-deita-dpomix/TVKD.yaml` |
+| DCKD | 42.13 | `DCKD.yaml` (repo root) |
+| ADPA | 42.15 | `ADPA.yaml` (repo root) — trades GSM8K (≈halved) for TruthfulQA (+≈5) |
+| riskKD (token-wt, earlier run) | 43.02 | already on HF as `llama-3.2-1b-riskkd-tokenwt-epoch1` |
+
+(Per-task JSONs live on the box under `results/eval/`; not all pulled to local yet.) Read: capacity-bound deltas — this lm-eval suite is the wrong instrument for preference distillation; an AlpacaEval2 / MT-Bench / reward-model eval would be the right one (offered, not yet run).
+
+### Qwen3-8B → Qwen3-1.7B campaign — STARTED, then stalled on a checkpoint-save crash
+
+Plan (from the user's target results-table): build everything from the public **base** models `Qwen/Qwen3-8B-Base` (teacher) + `Qwen/Qwen3-1.7B-Base` (student) from scratch — **no-thinking**, plain **ChatML** chat template (hard-coded in each recipe; Qwen has no BOS token). Pipeline: teacher SFT (Deita-10k, **1 ep**) → eval → teacher DPO (UltraFeedback, **1 ep**) → eval → student SFT (Deita-10k, **1 ep**) → eval → the 7 methods (DPO, WPO, Ra-DPO, DCKD, ADPA, TVKD, Ours/riskKD; **PAD skipped**) → eval all (~10 models) → push to HF → fill the table. Same datasets as Llama (`HuggingFaceH4/deita-10k-v0-sft` for SFTs, `pvdhihihi/ultra-feedback` for DPO/distillation). All W&B-tracked.
+
+**Prepared & committed:** `recipes/qwen3-1.7b-ultrafeedback/{teacher_sft,teacher_dpo,student_sft_init}.yaml` (1 epoch each; teacher-SFT lr 2.5e-5 / student-SFT lr 3e-5 / teacher-DPO lr 5e-7 β 0.01; ChatML template; `report_to: wandb`). Box orchestration scripts under `run_box/` — `box_qwen_sft*.sh` (SFT launch wrappers, export the W&B/HF env), `box_qwen_chain_a.sh` (= eval SFT teacher → teacher DPO → eval → student SFT → eval, fire-and-forget), `box_qwen_wandb_setup.sh`, `fix_qwen_epochs.sh`, `box_setup2.sh` (env bootstrap). **The 7-method Qwen recipes + the precompute/merge chain are NOT written yet.**
+
+**Where it stalled:** the **Qwen3-8B teacher SFT trained to completion** (1156 steps, 1 epoch, ~1 h on 2× B200, final loss ~0.80, W&B run `esdoavma`) — but the **training process was killed during the checkpoint save**, no Python traceback in the log. Result on disk: `output/qwen3-8b-deita-sft-teacher/checkpoint-1156/` has only `config.json`, `generation_config.json`, and shards `model-0000{1,2,3}-of-00004.safetensors` (~11.7 GB) — **missing `model-00004-of-00004.safetensors`, `model.safetensors.index.json`, all tokenizer files**, and the final `trainer.save_model(output_dir)` never ran (root `output_dir` empty). Ruled out: disk (MFS 273 TB free, `/` near-empty), host RAM (2.2 TB total, ~2 TB free; pod cgroup limit ≈527 GB — also far above need); `dmesg` not accessible. Best guess: a transient resource/FS event during the ~16 GB burst write → SIGKILL. **The checkpoint is unusable — the teacher SFT must be re-run.**
+
+**To resume** (after restarting the pod): re-run the teacher SFT. Suggested tweak first — set `save_strategy: "no"` in `recipes/qwen3-1.7b-ultrafeedback/teacher_sft.yaml` so it does only the single final `trainer.save_model(output_dir)` instead of also writing the redundant `checkpoint-1156/` autosave back-to-back (halves the save-time write burst; `run_sft.py` saves to `output_dir` unconditionally at the end). Then: `bash run_box/box_qwen_sft_bg.sh recipes/qwen3-1.7b-ultrafeedback/teacher_sft.yaml qwen_teacher_sft.log` → on completion `bash box_qwen_chain_a.sh` (chain A) → then write + run chain B (precompute the DPO-teacher logits on UltraFeedback → build `ultrafeedback-dckd` + `ultrafeedback-adpa` datasets → train DPO/WPO/Ra-DPO/DCKD/ADPA/TVKD/riskKD from the student SFT init → eval each → push to HF → fill the table).
 
 ## Context
 

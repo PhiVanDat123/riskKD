@@ -1,0 +1,54 @@
+# Teacher DPO — the Qwen3-8B SFT teacher DPO'd on UltraFeedback (1 epoch). Pure DPO
+# (dpo_weight=1, everything else 0). Run via scripts/run_distill_dpo.py.
+model_name_or_path: /workspace/riskKD/output/qwen3-8b-deita-sft-teacher
+ref_model_name_or_path: /workspace/riskKD/output/qwen3-8b-deita-sft-teacher
+chat_template: "{% for message in messages %}{{ '<|im_start|>' + message['role'] + '\n' + message['content'] | trim + '<|im_end|>' + '\n' }}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}"
+torch_dtype: bfloat16
+
+dataset_mixer:
+  pvdhihihi/ultra-feedback: 1.0
+dataset_splits:
+- train
+preprocessing_num_workers: 12
+
+bf16: true
+do_eval: false
+gradient_accumulation_steps: 1
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: False
+learning_rate: 5.0e-7
+log_level: info
+logging_steps: 5
+lr_scheduler_type: cosine
+max_length: 512
+max_prompt_length: 256
+num_train_epochs: 1
+optim: adamw_torch
+output_dir: /workspace/riskKD/output/qwen3-8b-ultrafeedback-dpo-teacher
+per_device_train_batch_size: 8
+push_to_hub: false
+save_strategy: "epoch"
+save_only_model: true
+seed: 42
+warmup_ratio: 0.1
+dataset_num_proc: 16
+beta: 0.01
+
+# loss weights — pure DPO
+sft_on_chosen: 0.0
+sft_on_rejected: 0.0
+dpo_weight: 1.0
+distillation_weight: 0.0
+chosen_distil_weight: 0.0
+rejected_distil_weight: 0.0
+adpa_weight: 0.0
+qadapter_distil_weight: 0.0
+kl_student_weight: 0.0
+precompute_ref_log_probs: false
+reference_free: false
+kl_penalty_weight: 0.0
+force_use_ref_model: true
+radpo_weight: 0.0
+report_to: wandb
+run_name: qwen3-8b-dpo-teacher

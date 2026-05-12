@@ -41,7 +41,7 @@ save_steps: 300
 save_only_model: true
 seed: 42
 warmup_ratio: 0.1
-dataset_num_proc: 64
+dataset_num_proc: 16
 beta: 0.01
 
 # DPO

@@ -12,23 +12,27 @@
 
 set -e
 set -o pipefail
+export HF_HOME=/workspace/.hf_home
+export HF_TOKEN=$(cat /workspace/.hf_home/token 2>/dev/null)
+export HF_HUB_ENABLE_HF_TRANSFER=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 trap 'echo -e "\n❌ [ERROR] Command failed: $BASH_COMMAND\n"' ERR
 
 # ----------------------------------------------------------------------------
 # Config — edit these
 # ----------------------------------------------------------------------------
 DATA="pvdhihihi/ultra-feedback"                                                       # dataset to precompute logits over (must match riskKD's dataset_mixer)
-TEACHER="/home/minchan.kwon/ADPA/model/llama3.2-1b-deita-dpomix/dpo_teacher_epoch1"    # the DPO-trained teacher (same model used as ref_model_name_or_path in riskKD.yaml)
+TEACHER="vukien2301/llama-3.1-8b-ultrafeedback-dpo-from-epoch1"    # the DPO-trained teacher (same model used as ref_model_name_or_path in riskKD.yaml)
 OUTDIR="data/llama3.2-1b-deita-dpomix"                                                 # where to write the per-split teacher-logp datasets + the merged dataset
 TAG="ultrafeedback-dpoteacher"                                                        # filename tag for the per-split logp dirs
 MERGED_OUT="${OUTDIR}/ultrafeedback-dckd"                                              # final merged dataset (-> dataset_mixer in the DCKD recipe)
-GPUS="0,1,2,3,4,5,6,7"
-NPROC=8
+GPUS="0,1"
+NPROC=2
 PORT=29501
 # 8B teacher in bf16 (~16GB) on 144GB H200s -> tons of headroom; pack many sequences
 # per batch instead of the upstream 1-seq-at-a-time default.
 MAX_TOK_PER_BATCH=16384
-MAX_BATCH_SIZE=48
+MAX_BATCH_SIZE=16
 PAD_TOKEN_ID=128001                                                                   # Llama-3 <|end_of_text|>
 
 # Llama-3 chat-format delimiters (the precompute wraps each turn with these)
@@ -113,7 +117,7 @@ if echo " $SPLITS " | grep -q " test "; then
 fi
 MERGE_ARGS="${MERGE_ARGS} --save-to ${MERGED_OUT}"
 
-log_and_run "merge" "python utils/merge_logits_dckd_dataset.py ${MERGE_ARGS}"
+log_and_run "merge" "python utils/fast_merge_dckd.py --base ${DATA} --root ${OUTDIR} --tag ${TAG} --out ${MERGED_OUT}"
 
 echo "==> Done. Merged dataset at: ${MERGED_OUT}"
 echo "    Set 'dataset_mixer: {${MERGED_OUT}: 1.0}' in the DCKD recipe YAML."

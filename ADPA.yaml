@@ -1,0 +1,67 @@
+# ADPA: advantage-guided distillation from DPO/reference teacher margins.
+# Requires a dataset with rejected_margin_logp_every, produced by
+# utils/merge_logits_adpa_dataset.py.
+
+# Model arguments
+model_name_or_path: model/student_sft_init
+ref_model_name_or_path: model/teacher_dpo
+torch_dtype: bfloat16
+
+# Data training arguments
+dataset_mixer:
+  data/llama3.2-1b-deita-dpomix/dpomix7k-adpa: 1.0
+dataset_splits:
+- train
+preprocessing_num_workers: 12
+
+# DPOTrainer arguments
+bf16: true
+do_eval: false
+gradient_accumulation_steps: 16
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+learning_rate: 5.0e-7
+log_level: info
+logging_steps: 1
+lr_scheduler_type: cosine
+max_length: 2048
+max_prompt_length: 1800
+num_train_epochs: 5
+optim: adamw_torch
+output_dir: model/adpa
+per_device_train_batch_size: 1
+push_to_hub: false
+save_strategy: steps
+save_steps: 300
+save_only_model: true
+seed: 42
+warmup_ratio: 0.1
+dataset_num_proc: 64
+beta: 0.01
+
+# Loss weights
+sft_on_chosen: 0.0
+sft_on_rejected: 0.0
+dpo_weight: 0.0
+distillation_weight: 0.0
+chosen_distil_weight: 0.0
+rejected_distil_weight: 0.0
+adpa_weight: 1.0
+adpa_loss_type: reverse_ce
+adpa_temperature: 1.0
+adpa_importance_sampling: false
+qadapter_distil_weight: 0.0
+dpkd_distil_weight: 0.0
+sequence_kd_weight: 0.0
+kl_student_weight: 0.0
+kl_student_target: both
+precompute_ref_log_probs: false
+reference_free: false
+kl_penalty_weight: 0.0
+force_use_ref_model: true
+
+# Disabled auxiliary objectives
+radpo_weight: 0.0
+report_to: wandb
+run_name: adpa-llama3.2-1b
