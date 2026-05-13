@@ -237,3 +237,110 @@ def test_softmax_with_budget_phase1_cascade():
     assert (w[mask] <= 1.5 + 1e-5).all(), f"violated w_max: {w}"
     assert (w[mask] >= 0.05 - 1e-5).all(), f"violated w_min: {w}"
     assert torch.allclose((w * mask).sum(-1), mask.sum(-1).float(), atol=1e-5)
+
+
+from utils.georisk_features import compute_georisk_token_weights
+
+
+def _make_dummy_batch(B=4, T=6, V=12, K=4, seed=0):
+    """Build a synthetic batch shaped like the post-slice tensors inside _radpo_get_batch_logps.
+
+    The first B/2 rows are 'chosen', the second B/2 are 'rejected'.
+    """
+    torch.manual_seed(seed)
+    student_logits = torch.randn(B, T, V)
+    reference_logits = torch.randn(B, T, V)
+    distribution_logps = student_logits.log_softmax(-1)
+    reference_distribution_logps = reference_logits.log_softmax(-1)
+    labels = torch.randint(0, V, (B, T))
+    loss_mask = torch.ones(B, T, dtype=torch.bool)
+    loss_mask[:, -1] = False  # last position is masked
+    branch_sign = torch.cat([torch.ones(B // 2, T), -torch.ones(B // 2, T)], dim=0)
+    per_position_kl = torch.randn(B, T).abs()
+    per_position_risk_ratio = torch.randn(B, T)
+    per_token_logps = distribution_logps.gather(-1, labels.unsqueeze(-1)).squeeze(-1)
+    per_reference_token_logps = reference_distribution_logps.gather(-1, labels.unsqueeze(-1)).squeeze(-1)
+    logps_margin = per_token_logps - per_reference_token_logps
+    return dict(
+        student_logits=student_logits,
+        reference_logits=reference_logits,
+        distribution_logps=distribution_logps,
+        reference_distribution_logps=reference_distribution_logps,
+        labels=labels,
+        loss_mask=loss_mask,
+        branch_sign=branch_sign,
+        per_position_kl=per_position_kl,
+        per_position_risk_ratio=per_position_risk_ratio,
+        per_token_logps=per_token_logps,
+        per_reference_token_logps=per_reference_token_logps,
+        logps_margin=logps_margin,
+    )
+
+
+def test_orchestrator_returns_budget_preserving_weights():
+    cfg = GeoRiskConfig(top_k=4, lambda_instability=1.0, lambda_unlearnability=0.0)
+    batch = _make_dummy_batch()
+    w, stats = compute_georisk_token_weights(config=cfg, **batch)
+    mask = batch["loss_mask"]
+    # Σ w over valid positions == |M_y|
+    assert torch.allclose((w * mask).sum(-1), mask.sum(-1).float(), atol=1e-4)
+    # Stats dict populated with expected keys
+    expected = {
+        "georisk/r_mean", "georisk/m_mean", "georisk/A_mean",
+        "georisk/D_mean", "georisk/I_mean", "georisk/N_mean",
+        "georisk/r_top_weighted", "georisk/A_top_weighted",
+        "georisk/token_weight_entropy", "georisk/effective_tokens",
+        "georisk/top10_weight_mass", "georisk/weight_chosen_mean",
+        "georisk/weight_rejected_mean", "georisk/nonfinite_count",
+    }
+    assert expected.issubset(stats.keys()), f"missing: {expected - stats.keys()}"
+
+
+def test_orchestrator_lambda_alignment_zero_short_circuits():
+    """When lambda_alignment=0, compute_branch_local_alignment must not be called."""
+    import utils.georisk_features as gf
+    cfg = GeoRiskConfig(top_k=4, lambda_alignment=0.0)
+    batch = _make_dummy_batch()
+
+    call_count = {"n": 0}
+    original = gf.compute_branch_local_alignment
+
+    def _spy(*args, **kwargs):
+        call_count["n"] += 1
+        return original(*args, **kwargs)
+
+    gf.compute_branch_local_alignment = _spy
+    try:
+        compute_georisk_token_weights(config=cfg, **batch)
+    finally:
+        gf.compute_branch_local_alignment = original
+    assert call_count["n"] == 0, "lambda_alignment=0 must short-circuit the alignment computation"
+
+
+def test_orchestrator_stopgrad_returns_detached_weights():
+    cfg = GeoRiskConfig(top_k=4, stopgrad=True)
+    batch = _make_dummy_batch()
+    # Make student logits require grad so naive code would propagate.
+    batch["student_logits"].requires_grad_(True)
+    batch["distribution_logps"] = batch["student_logits"].log_softmax(-1)
+    w, _ = compute_georisk_token_weights(config=cfg, **batch)
+    assert not w.requires_grad
+
+
+def test_orchestrator_all_masked_row_produces_no_nans():
+    cfg = GeoRiskConfig(top_k=4)
+    batch = _make_dummy_batch()
+    batch["loss_mask"][0] = False  # row 0 fully masked
+    w, stats = compute_georisk_token_weights(config=cfg, **batch)
+    assert torch.isfinite(w).all()
+    for k, v in stats.items():
+        assert torch.isfinite(v).all(), f"stat {k} is non-finite"
+
+
+def test_orchestrator_nonfinite_feature_replaced_with_zero():
+    cfg = GeoRiskConfig(top_k=4)
+    batch = _make_dummy_batch()
+    batch["per_position_risk_ratio"][0, 0] = float("nan")
+    w, stats = compute_georisk_token_weights(config=cfg, **batch)
+    assert torch.isfinite(w).all()
+    assert stats["georisk/nonfinite_count"].item() >= 1

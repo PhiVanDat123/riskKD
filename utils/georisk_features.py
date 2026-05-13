@@ -146,6 +146,13 @@ def compute_instability_proxy(per_token_logps: torch.Tensor, loss_mask: torch.Te
     return (N - masked_mean(N, loss_mask, dim=-1, keepdim=True)).abs()
 
 
+def _shannon_entropy(weights: torch.Tensor, mask_f: torch.Tensor, valid_count: torch.Tensor,
+                     eps: float = 1e-12) -> torch.Tensor:
+    """Shannon entropy of weights normalized to a probability distribution over valid tokens."""
+    p = (weights * mask_f) / valid_count.clamp_min(eps)
+    return -(p * p.clamp_min(eps).log()).sum()
+
+
 def softmax_with_budget(
     q: torch.Tensor,              # [B, T]
     loss_mask: torch.Tensor,      # [B, T] bool
@@ -232,3 +239,137 @@ def softmax_with_budget(
     w = torch.where(loss_mask, w, torch.zeros_like(w))
     w = torch.where(has_valid.expand_as(w), w, torch.zeros_like(w))
     return w
+
+
+def compute_georisk_token_weights(
+    *,
+    student_logits: torch.Tensor,                  # [B, T, V] (post-slice; pre-temperature)
+    reference_logits: torch.Tensor,                # [B, T, V]
+    distribution_logps: torch.Tensor,              # [B, T, V] = student log-softmax
+    reference_distribution_logps: torch.Tensor,    # [B, T, V] = reference log-softmax
+    labels: torch.Tensor,                          # [B, T]    (caller has already replaced -100 with 0)
+    loss_mask: torch.Tensor,                       # [B, T] bool
+    branch_sign: torch.Tensor,                     # [B, T]    +1 chosen rows, -1 rejected rows
+    per_position_kl: torch.Tensor,                 # [B, T]
+    per_position_risk_ratio: torch.Tensor,         # [B, T]
+    per_token_logps: torch.Tensor,                 # [B, T]
+    per_reference_token_logps: torch.Tensor,       # [B, T]  (kept for symmetry; unused in v1)
+    logps_margin: torch.Tensor,                    # [B, T]
+    config: GeoRiskConfig,
+):
+    """Compute fixed-budget per-token GeoRiskKD weights.
+
+    Returns:
+        weights:       [B, T]  (stop-gradient if config.stopgrad)
+        georisk_stats: dict[str, torch.Tensor scalar] — diagnostics for logging.
+                       Assumes B is even and the first B/2 rows are chosen, second half rejected.
+                       See spec §11.
+    """
+    del per_reference_token_logps  # not used in v1; documented for symmetry with spec
+    device = student_logits.device
+    dtype = student_logits.dtype
+    B, T = loss_mask.shape
+
+    with torch.no_grad():
+        # --- features ---
+        r_t = per_position_risk_ratio.detach()
+        D_t = per_position_kl.detach()
+
+        if config.lambda_relevance != 0.0:
+            m_t = compute_relevance_salience(logps_margin)
+        else:
+            m_t = torch.zeros((B, T), device=device, dtype=dtype)
+
+        if config.lambda_instability != 0.0:
+            I_t = compute_instability_proxy(per_token_logps, loss_mask)
+        else:
+            I_t = torch.zeros((B, T), device=device, dtype=dtype)
+
+        if config.lambda_unlearnability != 0.0:
+            N_t = -per_token_logps.detach()
+        else:
+            N_t = torch.zeros((B, T), device=device, dtype=dtype)
+
+        if config.lambda_alignment != 0.0:
+            A_t = compute_branch_local_alignment(
+                distribution_logps,
+                reference_distribution_logps,
+                labels,
+                branch_sign,
+                top_k=config.top_k,
+            )
+        else:
+            A_t = torch.zeros((B, T), device=device, dtype=dtype)
+
+        # --- nonfinite scrub ---
+        nonfinite = torch.zeros((), device=device)
+        cleaned = []
+        for f in (r_t, m_t, A_t, D_t, I_t, N_t):
+            finite = torch.isfinite(f)
+            nonfinite = nonfinite + (~finite).to(nonfinite.dtype).sum()
+            cleaned.append(torch.where(finite, f, torch.zeros_like(f)))
+        r_t, m_t, A_t, D_t, I_t, N_t = cleaned
+
+        # --- z-score per sequence ---
+        z_r = masked_zscore(r_t, loss_mask) if config.lambda_risk != 0.0 else r_t
+        z_m = masked_zscore(m_t, loss_mask) if config.lambda_relevance != 0.0 else m_t
+        z_A = masked_zscore(A_t, loss_mask) if config.lambda_alignment != 0.0 else A_t
+        z_D = masked_zscore(D_t, loss_mask) if config.lambda_kl != 0.0 else D_t
+        z_I = masked_zscore(I_t, loss_mask) if config.lambda_instability != 0.0 else I_t
+        z_N = masked_zscore(N_t, loss_mask) if config.lambda_unlearnability != 0.0 else N_t
+
+        q = (
+            config.lambda_risk * z_r
+            + config.lambda_relevance * z_m
+            + config.lambda_alignment * z_A
+            - config.lambda_kl * z_D
+            - config.lambda_instability * z_I
+            - config.lambda_unlearnability * z_N
+        )
+
+        weights = softmax_with_budget(
+            q, loss_mask,
+            tau=config.weight_tau,
+            w_min=config.weight_clip_min,
+            w_max=config.weight_clip_max,
+        )
+
+        # --- diagnostics ---
+        mask_f = loss_mask.to(weights.dtype)
+        valid_count = mask_f.sum().clamp_min(1)
+
+        def _mean_over_mask(t):
+            return (t * mask_f).sum() / valid_count
+
+        def _branch_mean(t):
+            half = t.shape[0] // 2
+            denom_c = mask_f[:half].sum().clamp_min(1)
+            denom_r = mask_f[half:].sum().clamp_min(1)
+            return (t[:half] * mask_f[:half]).sum() / denom_c, (t[half:] * mask_f[half:]).sum() / denom_r
+
+        # top-10% weighted positions for the *_top_weighted stats
+        flat_w = (weights * mask_f).flatten()
+        n_top = max(1, int(valid_count.item() * 0.1))
+        top_idx = flat_w.topk(min(n_top, flat_w.numel())).indices
+
+        stats = {
+            "georisk/r_mean": _mean_over_mask(r_t),
+            "georisk/m_mean": _mean_over_mask(m_t),
+            "georisk/A_mean": _mean_over_mask(A_t),
+            "georisk/D_mean": _mean_over_mask(D_t),
+            "georisk/I_mean": _mean_over_mask(I_t),
+            "georisk/N_mean": _mean_over_mask(N_t),
+            "georisk/nonfinite_count": nonfinite,
+            "georisk/effective_tokens": (weights * mask_f).sum(),
+            "georisk/top10_weight_mass": flat_w.index_select(0, top_idx).sum() / valid_count,
+            "georisk/token_weight_entropy": _shannon_entropy(weights, mask_f, valid_count),
+        }
+        cm, rm = _branch_mean(weights)
+        stats["georisk/weight_chosen_mean"] = cm
+        stats["georisk/weight_rejected_mean"] = rm
+        for name, f in (("r", r_t), ("m", m_t), ("A", A_t), ("D", D_t), ("I", I_t), ("N", N_t)):
+            stats[f"georisk/{name}_top_weighted"] = f.flatten().index_select(0, top_idx).mean()
+
+    if config.stopgrad:
+        weights = weights.detach()
+    return weights, stats
