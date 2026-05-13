@@ -185,3 +185,43 @@ def test_instability_handles_all_masked_row_without_nan():
     mask = torch.tensor([[False, False]])
     I = compute_instability_proxy(per_token_logps, mask)
     assert torch.isfinite(I).all()
+
+
+from utils.georisk_features import softmax_with_budget
+
+
+def test_softmax_with_budget_preserves_token_budget():
+    q = torch.tensor([[1.0, 2.0, 3.0, 4.0]])
+    mask = torch.ones(1, 4, dtype=torch.bool)
+    w = softmax_with_budget(q, mask, tau=1.0, w_min=0.05, w_max=3.0)
+    # Σ w over valid positions must equal |M_y| = 4
+    assert torch.allclose((w * mask).sum(-1), mask.sum(-1).float(), atol=1e-5)
+
+
+def test_softmax_with_budget_clamps_then_renormalizes():
+    # Hugely skewed q: most mass on token 3, but w_max=2.0 should clamp it.
+    q = torch.tensor([[0.0, 0.0, 0.0, 100.0]])
+    mask = torch.ones(1, 4, dtype=torch.bool)
+    w = softmax_with_budget(q, mask, tau=1.0, w_min=0.05, w_max=2.0)
+    # All valid weights must lie in [w_min, w_max] AFTER renorm. Budget invariant must still hold.
+    assert (w[mask] >= 0.05 - 1e-5).all()
+    assert (w[mask] <= 2.0 + 1e-5).all()
+    assert torch.allclose((w * mask).sum(-1), mask.sum(-1).float(), atol=1e-5)
+
+
+def test_softmax_with_budget_masked_positions_are_zero():
+    q = torch.randn(2, 6)
+    mask = torch.tensor([[True, True, False, True, True, False],
+                        [False, True, True, True, True, True]])
+    w = softmax_with_budget(q, mask, tau=1.0, w_min=0.05, w_max=3.0)
+    assert (w[~mask] == 0).all()
+
+
+def test_softmax_with_budget_all_masked_row_does_not_nan():
+    q = torch.randn(2, 4)
+    mask = torch.tensor([[False, False, False, False],
+                        [True, True, True, True]])
+    w = softmax_with_budget(q, mask, tau=1.0, w_min=0.05, w_max=3.0)
+    assert torch.isfinite(w).all()
+    # All-masked row: every position must be 0 (mask zeroes it post-hoc).
+    assert (w[0] == 0).all()

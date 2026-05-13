@@ -143,3 +143,83 @@ def compute_instability_proxy(per_token_logps: torch.Tensor, loss_mask: torch.Te
     """
     N = -per_token_logps.detach()
     return (N - masked_mean(N, loss_mask, dim=-1, keepdim=True)).abs()
+
+
+def softmax_with_budget(
+    q: torch.Tensor,              # [B, T]
+    loss_mask: torch.Tensor,      # [B, T] bool
+    tau: float,
+    w_min: float,
+    w_max: float,
+    eps: float = 1e-8,
+) -> torch.Tensor:                # [B, T]
+    """Fixed-budget softmax allocation: w_t = |M_y| · softmax(q/τ), then clamp, then renormalize.
+
+    Invariant on rows with at least one valid token:
+        (w * loss_mask).sum(-1) == loss_mask.sum(-1)
+
+    All-masked rows return all-zeros (the caller multiplies the weights by the mask anyway, so
+    this is safe). Masked positions in the output are always 0.
+    """
+    valid = loss_mask.to(q.dtype).sum(-1, keepdim=True)        # [B, 1]
+    has_valid = (valid > 0)                                     # [B, 1]
+    # Pre-softmax: -inf on masked positions, but for all-masked rows replace q with 0 to dodge softmax(-inf,...).
+    q_masked = q.masked_fill(~loss_mask, float("-inf"))
+    safe_q = torch.where(has_valid.expand_as(q_masked), q_masked, torch.zeros_like(q_masked))
+    w = torch.softmax(safe_q / max(tau, eps), dim=-1) * valid.clamp_min(1.0)   # [B, T]
+    # Two-phase projected-budget allocation.
+    #
+    # Phase 1 (upper projection): iteratively cap tokens exceeding w_max, redistributing the
+    # excess budget proportionally among the remaining tokens.  Proportional redistribution
+    # preserves the softmax score ordering and is numerically safe because only tokens with
+    # positive weight can exceed w_max.
+    #
+    # Phase 2 (lower projection): after all over-max tokens are fixed, floor remaining tokens
+    # at w_min and renormalize back to budget.  We iterate because renormalization after
+    # flooring can push previously-fine tokens over w_max again (rare but possible).
+    mask_f = loss_mask.to(w.dtype)
+    budget = valid.clamp_min(1.0)  # [B, 1]
+
+    # ── Phase 1: cap-and-redistribute (over w_max) ──────────────────────────────────────────
+    fixed_hi = torch.zeros_like(loss_mask)   # mask of tokens fixed at w_max
+    for _ in range(64):
+        over = (w > w_max + eps) & loss_mask & ~fixed_hi
+        if not over.any():
+            break
+        # Fix newly-over-max tokens at w_max.
+        fixed_hi = fixed_hi | over
+        w = torch.where(over, torch.full_like(w, w_max), w)
+        # Redistribute the residual budget to non-fixed tokens proportionally.
+        free = loss_mask & ~fixed_hi
+        fixed_sum = (w * fixed_hi.to(w.dtype)).sum(-1, keepdim=True)          # [B, 1]
+        remaining = (budget - fixed_sum).clamp_min(0.0)                        # [B, 1]
+        free_w = w * free.to(w.dtype)
+        free_sum = free_w.sum(-1, keepdim=True).clamp_min(eps)
+        w = torch.where(free, free_w * remaining / free_sum, w)
+
+    # ── Phase 2: floor-and-renorm (under w_min) ─────────────────────────────────────────────
+    # After phase 1 every valid token is ≤ w_max.  Now floor at w_min and renorm.
+    # Renorm can only push values upward, so w_min invariant is preserved.
+    # If renorm pushes a token over w_max, run another phase-1 pass.
+    for _ in range(64):
+        w = w.clamp(min=w_min) * mask_f
+        w_sum = (w * mask_f).sum(-1, keepdim=True).clamp_min(eps)
+        w = w * budget / w_sum * mask_f
+        # Check for new over-max violations introduced by the renorm.
+        over = (w > w_max + eps) & loss_mask
+        if not over.any():
+            break
+        # Fix new over-max tokens and redistribute (same logic as phase 1).
+        fixed_hi2 = over
+        w = torch.where(over, torch.full_like(w, w_max), w)
+        free2 = loss_mask & ~fixed_hi2
+        fixed_sum2 = (w * fixed_hi2.to(w.dtype)).sum(-1, keepdim=True)
+        remaining2 = (budget - fixed_sum2).clamp_min(0.0)
+        free_w2 = w * free2.to(w.dtype)
+        free_sum2 = free_w2.sum(-1, keepdim=True).clamp_min(eps)
+        w = torch.where(free2, free_w2 * remaining2 / free_sum2, w)
+
+    # Zero out masked positions and all-masked rows.
+    w = torch.where(loss_mask, w, torch.zeros_like(w))
+    w = torch.where(has_valid.expand_as(w), w, torch.zeros_like(w))
+    return w
