@@ -1,0 +1,79 @@
+# riskKD (Qwen3 1.7B student ← 8B DPO teacher) — Ra-DPO + token-weighted (kl_inv) risk correction.
+# Mirrors recipes/llama3.2-1b-deita-dpomix/riskKD.yaml (latest variant: pure Ra-DPO + token-weighting,
+# no plain DPO term, no qadapter distill, mu-annealed CVaR confidence).
+model_name_or_path: /workspace/riskKD/output/qwen3-1.7b-deita-sft-student
+ref_model_name_or_path: /workspace/riskKD/output/qwen3-8b-ultrafeedback-dpo-teacher
+chat_template: "{% for message in messages %}{{ '<|im_start|>' + message['role'] + '\n' + message['content'] | trim + '<|im_end|>' + '\n' }}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}"
+torch_dtype: bfloat16
+
+dataset_mixer:
+  pvdhihihi/ultra-feedback: 1.0
+dataset_splits:
+- train
+preprocessing_num_workers: 12
+
+bf16: true
+do_eval: false
+gradient_accumulation_steps: 1
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: False
+learning_rate: 5.0e-7
+log_level: info
+logging_steps: 5
+lr_scheduler_type: constant
+max_length: 512
+max_prompt_length: 256
+num_train_epochs: 1
+optim: adamw_torch
+output_dir: /workspace/riskKD/output/qwen3-1.7b-riskKD
+per_device_train_batch_size: 8
+push_to_hub: false
+save_strategy: "epoch"
+save_only_model: true
+seed: 42
+warmup_ratio: 0.1
+dataset_num_proc: 16
+beta: 0.1
+
+# DPO/distill weights (riskKD = pure Ra-DPO; no plain-DPO, no DCKD, no ADPA, no qadapter)
+sft_on_chosen: 0.0
+sft_on_rejected: 0.0
+dpo_weight: 0.0
+distillation_weight: 0
+chosen_distil_weight: 0
+rejected_distil_weight: 0
+adpa_weight: 0
+qadapter_distil_weight: 0
+qadapter_loss_type: "dpo"
+kl_student_weight: 0.0
+kl_student_target: "both"
+precompute_ref_log_probs: false
+reference_free: false
+kl_penalty_weight: 0.0
+force_use_ref_model: true
+qadapter_alpha_tilde: 1.0
+qadapter_alpha: 0.7
+qadapter_alpha_1: 0.0
+qadapter_softvalue_type: "entropy"
+
+# Ra-DPO / CVaR
+radpo_weight: 1.0
+radpo_alpha: 0.5
+radpo_confidence_level: 0.5
+if_radpo2: false
+is_split_risk_ratio: false
+is_cal_risk_distribution_logps: false
+radpo_keep_ref_model: true
+# Anneal mu from 0.99 (near expectation) to 0.5 (median-tail risk) over the full run.
+radpo_mu_anneal_start: 0.99
+radpo_mu_anneal_end: 0.5
+radpo_mu_anneal_frac: 1.0
+# Token-level weighting: w_t = exp(-alpha * per_position_KL_t), normalized per seq, applied to risk only.
+radpo_token_weight_mode: kl_inv
+radpo_token_weight_alpha: 1.0
+radpo_token_weight_normalize: true
+radpo_token_weight_target: risk
+
+report_to: wandb
+run_name: qwen3-1.7b-riskKD
