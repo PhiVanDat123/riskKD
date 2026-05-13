@@ -1925,6 +1925,9 @@ class DistillTrainer(Trainer):
             metrics[f"{prefix}radpo_risk/chosen"] = chosen_position_risk_ratio.detach().mean().cpu()
             metrics[f"{prefix}radpo_risk/rejected"] = rejected_position_risk_ratio.detach().mean().cpu()
             metrics[f"{prefix}radpo_mu"] = float(getattr(self, "_current_radpo_mu", self.args.radpo_confidence_level))
+            # GeoRiskKD diagnostics (empty dict when mode != "georisk").
+            for _k, _v in georisk_stats.items():
+                metrics[f"{prefix}{_k}"] = _v.detach().cpu() if hasattr(_v, "detach") else _v
 
         #PART2.5 : Reference regularizer
         if self.args.kl_student_weight>0:
