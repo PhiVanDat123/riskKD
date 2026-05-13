@@ -1685,13 +1685,15 @@ class DistillTrainer(Trainer):
     def radpo_concatenated_forward(self, model: nn.Module, batch: dict):
         """Forward pass for Ra-DPO: computes log-prob margins, KL, and CVaR risk ratios.
 
-        Returns:
+        Returns a 15-tuple:
             chosen_logps_margin, rejected_logps_margin,
             chosen_weighted_position_kl, rejected_weighted_position_kl,
             chosen_raw_position_kl, rejected_raw_position_kl,
             chosen_position_risk_ratio, rejected_position_risk_ratio,
             chosen_logps (detached), rejected_logps (detached),
-            chosen/rejected mean token weights and effective token counts
+            chosen_mean_token_weight, rejected_mean_token_weight,
+            chosen_effective_token_count, rejected_effective_token_count,
+            georisk_stats (dict[str, scalar]; empty unless mode='georisk')
         """
         compte_ref_context_manager = amp.autocast("cuda") if self._peft_has_been_casted_to_bf16 else nullcontext()
 
@@ -1742,6 +1744,22 @@ class DistillTrainer(Trainer):
             mu = ms + prog * (me - ms)
         self._current_radpo_mu = mu  # exposed for metric logging in get_batch_loss_metrics
 
+        # GeoRiskKD: branch_sign labels each concatenated row as chosen (+1) or rejected (-1).
+        # max_length comes from labels.shape[1] above (unsliced); _radpo_get_batch_logps will slice
+        # it consistently with labels via branch_sign[:, 1:].
+        branch_sign = torch.cat(
+            [
+                torch.ones(num_examples, max_length, device=labels.device, dtype=torch.float32),
+                -torch.ones(num_examples, max_length, device=labels.device, dtype=torch.float32),
+            ],
+            dim=0,
+        )
+        georisk_config = (
+            GeoRiskConfig.from_args(self.args)
+            if getattr(self.args, "radpo_token_weight_mode", "none") == "georisk"
+            else None
+        )
+
         (
             all_logps_margin,
             all_weighted_position_kl,
@@ -1750,6 +1768,7 @@ class DistillTrainer(Trainer):
             all_logps,
             all_mean_token_weight,
             all_effective_token_count,
+            all_georisk_stats,
         ) = _radpo_get_batch_logps(
             all_logits, ref_all_logits, labels, concatenated_weights,
             confidence_level=mu,
@@ -1760,6 +1779,8 @@ class DistillTrainer(Trainer):
             token_weight_alpha=getattr(self.args, "radpo_token_weight_alpha", 0.0),
             token_weight_normalize=getattr(self.args, "radpo_token_weight_normalize", False),
             token_weight_target=getattr(self.args, "radpo_token_weight_target", "all"),
+            branch_sign=branch_sign,
+            georisk_config=georisk_config,
         )
 
         return (
@@ -1777,6 +1798,7 @@ class DistillTrainer(Trainer):
             all_mean_token_weight[num_examples:],   # rejected_mean_token_weight
             all_effective_token_count[:num_examples], # chosen_effective_token_count
             all_effective_token_count[num_examples:], # rejected_effective_token_count
+            all_georisk_stats,                       # dict[str, scalar] (empty unless mode=georisk)
         )
 
     @staticmethod
@@ -1875,7 +1897,8 @@ class DistillTrainer(Trainer):
              chosen_position_risk_ratio, rejected_position_risk_ratio,
              radpo_chosen_logps, radpo_rejected_logps,
              chosen_mean_token_weight, rejected_mean_token_weight,
-             chosen_effective_token_count, rejected_effective_token_count) = self.radpo_concatenated_forward(model, batch)
+             chosen_effective_token_count, rejected_effective_token_count,
+             georisk_stats) = self.radpo_concatenated_forward(model, batch)
 
             radpo_losses, radpo_chosen_rewards, radpo_rejected_rewards = radpo_loss_fn(
                 chosen_logps_margin, rejected_logps_margin,
