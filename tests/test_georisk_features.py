@@ -67,3 +67,45 @@ def test_georisk_config_defaults_match_spec():
     assert cfg.weight_clip_min == 0.05
     assert cfg.weight_clip_max == 3.0
     assert cfg.stopgrad is True
+
+
+from utils.georisk_features import project_reference_topk_with_labels
+
+
+def test_project_topk_returns_k_plus_one_slots():
+    B, T, V, K = 2, 3, 10, 4
+    ref_logp = torch.randn(B, T, V).log_softmax(-1)
+    labels = torch.zeros(B, T, dtype=torch.long)
+    idx = project_reference_topk_with_labels(ref_logp, labels, top_k=K)
+    assert idx.shape == (B, T, K + 1)
+    assert idx.dtype == torch.long
+
+
+def test_project_topk_label_in_last_slot():
+    B, T, V, K = 1, 1, 6, 3
+    ref_logp = torch.tensor([[[0.1, 0.5, 0.05, 0.2, 0.1, 0.05]]]).log()
+    # top-3 of ref by logp = ids [1, 3, 0] (probs 0.5, 0.2, 0.1)
+    labels = torch.tensor([[5]])  # not in top-3
+    idx = project_reference_topk_with_labels(ref_logp, labels, top_k=K)
+    assert idx[0, 0, -1].item() == 5, "label id must occupy the last slot"
+    topk = set(idx[0, 0, :K].tolist())
+    assert topk == {0, 1, 3}, f"first K slots must be ref top-K ids, got {topk}"
+
+
+def test_project_topk_duplicate_when_label_already_in_topk():
+    B, T, V, K = 1, 1, 6, 3
+    ref_logp = torch.tensor([[[0.1, 0.5, 0.05, 0.2, 0.1, 0.05]]]).log()
+    labels = torch.tensor([[1]])  # already top-1
+    idx = project_reference_topk_with_labels(ref_logp, labels, top_k=K)
+    # Per spec §7.4: the duplicate is intentional and acceptable for v1.
+    assert idx[0, 0, -1].item() == 1
+    assert (idx[0, 0] == 1).sum().item() == 2, "expected duplicate label slot"
+
+
+def test_project_topk_clamps_to_vocab_minus_one():
+    B, T, V = 1, 1, 5
+    ref_logp = torch.randn(B, T, V).log_softmax(-1)
+    labels = torch.zeros(B, T, dtype=torch.long)
+    # request more than vocab supports; helper must clamp K to V-1
+    idx = project_reference_topk_with_labels(ref_logp, labels, top_k=99)
+    assert idx.shape == (B, T, V)  # (V-1) + 1 label slot = V

@@ -71,3 +71,27 @@ def masked_zscore(x: torch.Tensor, mask: torch.Tensor, dim: int = -1, eps: float
     var = masked_mean((x - mu) ** 2, mask, dim=dim, keepdim=True)
     z = (x - mu) / var.clamp_min(eps).sqrt()
     return z * mask.to(z.dtype)
+
+
+def project_reference_topk_with_labels(
+    reference_distribution_logps: torch.Tensor,  # [B, T, V]
+    labels: torch.Tensor,                        # [B, T]   long, already-zeroed at masked positions
+    top_k: int,
+) -> torch.Tensor:                               # [B, T, K+1]
+    """Per-position vocabulary projection: top-K of reference logps with the observed label appended.
+
+    Always allocates K+1 slots:
+      - first K = reference top-K vocab ids (descending by reference logp);
+      - last slot = the observed label id.
+
+    If the label is already in the top-K, the last slot becomes a duplicate of one of the
+    earlier slots; this is acceptable for v1 (it only rescales one component of the local
+    cosine in compute_branch_local_alignment). See spec §7.4.
+
+    `top_k` is clamped to `V - 1` so the appended label always has its own slot conceptually.
+    """
+    V = reference_distribution_logps.shape[-1]
+    K = max(1, min(int(top_k), V - 1))
+    topk_idx = reference_distribution_logps.topk(K, dim=-1).indices  # [B, T, K]
+    label_idx = labels.unsqueeze(-1).to(topk_idx.dtype)              # [B, T, 1]
+    return torch.cat([topk_idx, label_idx], dim=-1)                  # [B, T, K+1]
