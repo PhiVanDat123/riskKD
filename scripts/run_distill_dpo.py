@@ -197,10 +197,23 @@ class CustomDPOConfig(TrainingArguments):
     is_split_risk_ratio: Optional[bool] = field(default=True, metadata={"help": "Split vocab into two halves for CVaR if True."})
     is_cal_risk_distribution_logps: Optional[bool] = field(default=False, metadata={"help": "Use risk distribution logps variant for CVaR if True."})
     radpo_keep_ref_model: Optional[bool] = field(default=True, metadata={"help": "Keep/use the explicit reference model for Ra-DPO even when dpo_weight is 0."})
-    radpo_token_weight_mode: Optional[str] = field(default="none", metadata={"help": "Token-level weighting inside Ra-DPO: 'none' or 'kl_inv' (w_t = exp(-alpha * per_position_KL_t))."})
+    radpo_token_weight_mode: Optional[str] = field(default="none", metadata={"help": "Token-level weighting inside Ra-DPO: 'none', 'kl_inv' (w_t = exp(-alpha * per_position_KL_t)), or 'georisk' (fixed-budget softmax over branch-local features; see utils/georisk_features.py)."})
     radpo_token_weight_alpha: Optional[float] = field(default=0.0, metadata={"help": "Alpha for kl_inv token weighting. Larger => more aggressive downweighting of high-KL tokens."})
     radpo_token_weight_normalize: Optional[bool] = field(default=False, metadata={"help": "Normalize token weights per sequence to keep the effective Ra-DPO loss scale stable."})
     radpo_token_weight_target: Optional[str] = field(default="all", metadata={"help": "Where to apply token weights inside Ra-DPO: 'all' or 'risk' (risk correction only)."})
+    # --- GeoRiskKD (radpo_token_weight_mode="georisk") ---
+    radpo_georisk_top_k: Optional[int] = field(default=64, metadata={"help": "Per-position top-K reference vocabulary size for the alignment feature. K is clamped to V-1."})
+    radpo_georisk_teacher_temperature: Optional[float] = field(default=1.0, metadata={"help": "Teacher softmax temperature for GeoRiskKD feature extraction. Keep at 1.0 to reuse reference_distribution_logps without an extra log-softmax pass."})
+    radpo_georisk_lambda_risk: Optional[float] = field(default=1.0, metadata={"help": "Score weight on z-scored per-token risk salience r_t."})
+    radpo_georisk_lambda_relevance: Optional[float] = field(default=0.5, metadata={"help": "Score weight on z-scored relevance proxy m_t = |logps_margin|."})
+    radpo_georisk_lambda_alignment: Optional[float] = field(default=0.5, metadata={"help": "Score weight on z-scored branch-local logit-gradient alignment A_t."})
+    radpo_georisk_lambda_kl: Optional[float] = field(default=1.0, metadata={"help": "Score weight (subtracted) on z-scored teacher-student KL D_t."})
+    radpo_georisk_lambda_instability: Optional[float] = field(default=0.0, metadata={"help": "Score weight (subtracted) on z-scored instability proxy I_t. 0.0 by default."})
+    radpo_georisk_lambda_unlearnability: Optional[float] = field(default=0.0, metadata={"help": "Score weight (subtracted) on z-scored unlearnability proxy N_t = -log pi_theta. 0.0 by default."})
+    radpo_georisk_weight_tau: Optional[float] = field(default=1.0, metadata={"help": "Softmax temperature for the fixed-budget allocation."})
+    radpo_georisk_weight_clip_min: Optional[float] = field(default=0.05, metadata={"help": "Lower clip on per-token weight after the softmax allocation (renormalized to budget afterwards)."})
+    radpo_georisk_weight_clip_max: Optional[float] = field(default=3.0, metadata={"help": "Upper clip on per-token weight after the softmax allocation."})
+    radpo_georisk_stopgrad: Optional[bool] = field(default=True, metadata={"help": "Detach GeoRiskKD weights before applying them to the Ra-DPO loss. Default True."})
     # Annealed risk operator mu (= the CVaR confidence_level). If both _start and _end are set,
     # confidence_level is linearly interpolated from _start (at step 0) to _end (by _frac of total
     # training steps). If unset, the fixed `radpo_confidence_level` is used (no annealing).

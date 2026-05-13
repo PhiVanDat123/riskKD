@@ -361,3 +361,33 @@ def test_orchestrator_nonfinite_feature_replaced_with_zero():
     w, stats = compute_georisk_token_weights(config=cfg, **batch)
     assert torch.isfinite(w).all()
     assert stats["georisk/nonfinite_count"].item() >= 1
+
+
+def test_geo_risk_config_from_args_reads_radpo_georisk_fields():
+    class FakeArgs:
+        radpo_georisk_top_k = 32
+        radpo_georisk_teacher_temperature = 2.5
+        radpo_georisk_lambda_risk = 0.7
+        radpo_georisk_lambda_relevance = 0.0
+        radpo_georisk_lambda_alignment = 1.5
+        radpo_georisk_lambda_kl = 0.9
+        radpo_georisk_lambda_instability = 0.2
+        radpo_georisk_lambda_unlearnability = 0.1
+        radpo_georisk_weight_tau = 0.8
+        radpo_georisk_weight_clip_min = 0.01
+        radpo_georisk_weight_clip_max = 5.0
+        radpo_georisk_stopgrad = False
+
+    cfg = GeoRiskConfig.from_args(FakeArgs())
+    assert cfg.top_k == 32
+    assert cfg.teacher_temperature == 2.5
+    assert cfg.lambda_risk == 0.7
+    assert cfg.lambda_relevance == 0.0
+    assert cfg.lambda_alignment == 1.5
+    assert cfg.lambda_kl == 0.9
+    assert cfg.lambda_instability == 0.2
+    assert cfg.lambda_unlearnability == 0.1
+    assert cfg.weight_tau == 0.8
+    assert cfg.weight_clip_min == 0.01
+    assert cfg.weight_clip_max == 5.0
+    assert cfg.stopgrad is False
