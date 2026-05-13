@@ -95,3 +95,33 @@ def project_reference_topk_with_labels(
     topk_idx = reference_distribution_logps.topk(K, dim=-1).indices  # [B, T, K]
     label_idx = labels.unsqueeze(-1).to(topk_idx.dtype)              # [B, T, 1]
     return torch.cat([topk_idx, label_idx], dim=-1)                  # [B, T, K+1]
+
+
+def compute_branch_local_alignment(
+    student_distribution_logps: torch.Tensor,    # [B, T, V]
+    reference_distribution_logps: torch.Tensor,  # [B, T, V]
+    labels: torch.Tensor,                        # [B, T]
+    branch_sign: torch.Tensor,                   # [B, T]  in {+1, -1}
+    top_k: int,
+    eps: float = 1e-8,
+) -> torch.Tensor:                               # [B, T]
+    """Branch-local logit-gradient proxy A_t = cosine(trust_dir, pref_dir).
+
+    On the K+1-slot vocabulary {top_k(ref_t) ∪ {label_t}}:
+      trust_dir = p_ref_k - p_student_k        # where the reference wants probability to move
+      pref_dir  = branch_sign * (onehot_k - p_student_k)
+                                                # +1: chosen → push toward label
+                                                # -1: rejected → push away from label
+      A_t       = cosine(trust_dir, pref_dir)
+
+    A high A_t means the reference correction direction agrees with the branch-local
+    preference update direction.
+    """
+    idx = project_reference_topk_with_labels(reference_distribution_logps, labels, top_k)  # [B,T,K+1]
+    p_ref_k = reference_distribution_logps.gather(-1, idx).exp()                            # [B,T,K+1]
+    p_stu_k = student_distribution_logps.gather(-1, idx).exp()                              # [B,T,K+1]
+    onehot_k = (idx == labels.unsqueeze(-1)).to(p_ref_k.dtype)                              # [B,T,K+1]
+    trust_dir = p_ref_k - p_stu_k
+    pref_dir = branch_sign.unsqueeze(-1) * (onehot_k - p_stu_k)
+    cos = torch.nn.functional.cosine_similarity(trust_dir, pref_dir, dim=-1, eps=eps)
+    return cos.clamp(-1.0, 1.0)

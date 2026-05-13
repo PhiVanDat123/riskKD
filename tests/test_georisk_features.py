@@ -109,3 +109,53 @@ def test_project_topk_clamps_to_vocab_minus_one():
     # request more than vocab supports; helper must clamp K to V-1
     idx = project_reference_topk_with_labels(ref_logp, labels, top_k=99)
     assert idx.shape == (B, T, V)  # (V-1) + 1 label slot = V
+
+
+from utils.georisk_features import compute_branch_local_alignment
+
+
+def _logp_from_probs(p):
+    return torch.log(torch.clamp(p, min=1e-12))
+
+
+def test_alignment_high_when_ref_agrees_with_label_on_chosen_branch():
+    # Single token; vocab=4; label=0; ref puts mass on label; student is uniform.
+    B, T, V = 1, 1, 4
+    p_ref = torch.tensor([[[0.85, 0.05, 0.05, 0.05]]])
+    p_stu = torch.tensor([[[0.25, 0.25, 0.25, 0.25]]])
+    labels = torch.tensor([[0]])
+    branch_sign = torch.ones(B, T)
+    A = compute_branch_local_alignment(
+        _logp_from_probs(p_stu), _logp_from_probs(p_ref), labels, branch_sign, top_k=3,
+    )
+    # trust_dir ≈ +0.6 at idx 0, slightly negative elsewhere; pref_dir = +1 * (onehot - p_stu)
+    # is +0.75 at idx 0, -0.25 elsewhere. Vectors point in the same direction → cosine ≈ +1.
+    assert A.shape == (B, T)
+    assert A.item() > 0.9
+
+
+def test_alignment_flips_sign_on_rejected_branch():
+    B, T, V = 1, 1, 4
+    p_ref = torch.tensor([[[0.85, 0.05, 0.05, 0.05]]])
+    p_stu = torch.tensor([[[0.25, 0.25, 0.25, 0.25]]])
+    labels = torch.tensor([[0]])
+    A_chosen = compute_branch_local_alignment(
+        _logp_from_probs(p_stu), _logp_from_probs(p_ref), labels, torch.ones(B, T), top_k=3,
+    )
+    A_rejected = compute_branch_local_alignment(
+        _logp_from_probs(p_stu), _logp_from_probs(p_ref), labels, -torch.ones(B, T), top_k=3,
+    )
+    assert torch.allclose(A_chosen, -A_rejected, atol=1e-5)
+
+
+def test_alignment_is_finite_and_bounded():
+    B, T, V = 3, 5, 32
+    p_ref = torch.softmax(torch.randn(B, T, V), dim=-1)
+    p_stu = torch.softmax(torch.randn(B, T, V), dim=-1)
+    labels = torch.randint(0, V, (B, T))
+    branch_sign = torch.cat([torch.ones(1, T), -torch.ones(1, T), torch.ones(1, T)], dim=0)
+    A = compute_branch_local_alignment(
+        _logp_from_probs(p_stu), _logp_from_probs(p_ref), labels, branch_sign, top_k=8,
+    )
+    assert torch.isfinite(A).all()
+    assert (A.abs() <= 1.0 + 1e-5).all()
