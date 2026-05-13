@@ -225,3 +225,15 @@ def test_softmax_with_budget_all_masked_row_does_not_nan():
     assert torch.isfinite(w).all()
     # All-masked row: every position must be 0 (mask zeroes it post-hoc).
     assert (w[0] == 0).all()
+
+
+def test_softmax_with_budget_phase1_cascade():
+    """Two tokens tied at the top with budget=4 and w_max=1.5 forces Phase 1 to cap both
+    of them and redistribute the surplus to the remaining tokens. Verifies the iterative
+    water-filling resolves the cascade and still satisfies both invariants."""
+    q = torch.tensor([[100.0, 100.0, 0.0, 0.0]])
+    mask = torch.ones(1, 4, dtype=torch.bool)
+    w = softmax_with_budget(q, mask, tau=1.0, w_min=0.05, w_max=1.5)
+    assert (w[mask] <= 1.5 + 1e-5).all(), f"violated w_max: {w}"
+    assert (w[mask] >= 0.05 - 1e-5).all(), f"violated w_min: {w}"
+    assert torch.allclose((w * mask).sum(-1), mask.sum(-1).float(), atol=1e-5)

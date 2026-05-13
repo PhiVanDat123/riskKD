@@ -5,6 +5,7 @@ See docs/superpowers/specs/2026-05-13-georiskkd-design.md for the full design.
 """
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 
 import torch
@@ -182,7 +183,8 @@ def softmax_with_budget(
 
     # ── Phase 1: cap-and-redistribute (over w_max) ──────────────────────────────────────────
     fixed_hi = torch.zeros_like(loss_mask)   # mask of tokens fixed at w_max
-    for _ in range(64):
+    over = torch.zeros_like(loss_mask)       # initialise so else-clause can check it
+    for _iter in range(64):
         over = (w > w_max + eps) & loss_mask & ~fixed_hi
         if not over.any():
             break
@@ -196,6 +198,13 @@ def softmax_with_budget(
         free_w = w * free.to(w.dtype)
         free_sum = free_w.sum(-1, keepdim=True).clamp_min(eps)
         w = torch.where(free, free_w * remaining / free_sum, w)
+    else:
+        if over.any():
+            warnings.warn(
+                f"softmax_with_budget Phase 1 did not converge in 64 iterations; "
+                f"{int(over.sum().item())} tokens still violate w_max",
+                RuntimeWarning,
+            )
 
     # ── Phase 2: floor-and-renorm (under w_min) ─────────────────────────────────────────────
     # After phase 1 every valid token is ≤ w_max.  Now floor at w_min and renorm.
