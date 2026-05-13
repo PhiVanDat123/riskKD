@@ -1,0 +1,91 @@
+# GeoRiskKD (target=all) — Llama 3.2 1B student ← Llama 3.1 8B DPO teacher.
+# Same as georiskKD.yaml but the per-token weight is applied to BOTH the utility
+# log-ratios (u) and the risk correction (δ). Tests the large-gap variant from
+# §9 of the v2 proposal: under severe teacher-student mismatch, all teacher-ratio
+# supervision may be unreliable and benefit from re-allocation.
+
+model_name_or_path: vukien2301/llama-3.2-1b-deita-sft-student
+ref_model_name_or_path: vukien2301/llama-3.1-8b-ultrafeedback-dpo-from-epoch1
+torch_dtype: bfloat16
+
+dataset_mixer:
+  pvdhihihi/ultra-feedback: 1.0
+dataset_splits:
+- train
+preprocessing_num_workers: 12
+
+bf16: true
+do_eval: false
+gradient_accumulation_steps: 1
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: False
+learning_rate: 5.0e-7
+log_level: info
+logging_steps: 1
+lr_scheduler_type: constant
+max_length: 512
+max_prompt_length: 256
+num_train_epochs: 3
+optim: adamw_torch
+output_dir: /workspace/riskKD/output/llama-3.2-1b-georiskKD-all
+per_device_train_batch_size: 8
+push_to_hub: false
+save_strategy: "epoch"
+save_only_model: true
+seed: 42
+warmup_ratio: 0.1
+dataset_num_proc: 64
+beta: 0.1
+
+sft_on_chosen: 0.0
+sft_on_rejected: 0.0
+dpo_weight: 0.0
+distillation_weight: 0
+chosen_distil_weight: 0
+rejected_distil_weight: 0
+adpa_weight: 0
+qadapter_distil_weight: 0
+qadapter_loss_type: "dpo"
+kl_student_weight: 0.0
+kl_student_target: "both"
+precompute_ref_log_probs: false
+reference_free: false
+kl_penalty_weight: 0.0
+force_use_ref_model: true
+qadapter_alpha_tilde: 1.0
+qadapter_alpha: 0.7
+qadapter_alpha_1: 0.0
+qadapter_softvalue_type: "entropy"
+
+radpo_weight: 1.0
+radpo_alpha: 0.5
+radpo_confidence_level: 0.5
+if_radpo2: false
+is_split_risk_ratio: false
+is_cal_risk_distribution_logps: false
+radpo_keep_ref_model: true
+radpo_mu_anneal_start: 0.99
+radpo_mu_anneal_end: 0.5
+radpo_mu_anneal_frac: 1.0
+
+# GeoRiskKD — target=all
+radpo_token_weight_mode: georisk
+radpo_token_weight_target: all
+radpo_token_weight_normalize: false
+
+radpo_georisk_top_k: 64
+radpo_georisk_teacher_temperature: 1.0
+radpo_georisk_lambda_risk: 1.0
+radpo_georisk_lambda_relevance: 0.5
+radpo_georisk_lambda_alignment: 0.5
+radpo_georisk_lambda_kl: 1.0
+radpo_georisk_lambda_instability: 0.0
+radpo_georisk_lambda_unlearnability: 0.0
+radpo_georisk_weight_tau: 1.0
+radpo_georisk_weight_clip_min: 0.05
+radpo_georisk_weight_clip_max: 3.0
+radpo_georisk_stopgrad: true
+
+report_to: wandb
+run_name: llama-3.2-1b-georiskKD-all
