@@ -3,8 +3,8 @@
 # radpo_token_weight_mode is switched to 'georisk' and the radpo_georisk_* knobs are set.
 # Per the v2 design spec, target=risk weights only the Ra-DPO risk correction (δ),
 # leaving the utility log-ratios (u) untouched. This is the clean attribution variant.
-model_name_or_path: /workspace/riskKD/output/qwen3-1.7b-deita-sft-student
-ref_model_name_or_path: /workspace/riskKD/output/qwen3-8b-ultrafeedback-dpo-teacher
+model_name_or_path: vukien2301/qwen3-1.7b-deita-sft-student
+ref_model_name_or_path: vukien2301/qwen3-8b-ultrafeedback-dpo-teacher
 chat_template: "{% for message in messages %}{{ '<|im_start|>' + message['role'] + '\n' + message['content'] | trim + '<|im_end|>' + '\n' }}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}"
 torch_dtype: bfloat16
 

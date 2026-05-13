@@ -4,8 +4,8 @@
 # radpo_token_weight_* and radpo_georisk_* knobs. Tests the large-gap variant from
 # §9 of the v2 proposal: under severe teacher-student mismatch, all teacher-ratio
 # supervision may be unreliable and benefit from re-allocation.
-model_name_or_path: /workspace/riskKD/output/qwen3-1.7b-deita-sft-student
-ref_model_name_or_path: /workspace/riskKD/output/qwen3-8b-ultrafeedback-dpo-teacher
+model_name_or_path: vukien2301/qwen3-1.7b-deita-sft-student
+ref_model_name_or_path: vukien2301/qwen3-8b-ultrafeedback-dpo-teacher
 chat_template: "{% for message in messages %}{{ '<|im_start|>' + message['role'] + '\n' + message['content'] | trim + '<|im_end|>' + '\n' }}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}"
 torch_dtype: bfloat16
 
