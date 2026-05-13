@@ -146,13 +146,6 @@ def compute_instability_proxy(per_token_logps: torch.Tensor, loss_mask: torch.Te
     return (N - masked_mean(N, loss_mask, dim=-1, keepdim=True)).abs()
 
 
-def _shannon_entropy(weights: torch.Tensor, mask_f: torch.Tensor, valid_count: torch.Tensor,
-                     eps: float = 1e-12) -> torch.Tensor:
-    """Shannon entropy of weights normalized to a probability distribution over valid tokens."""
-    p = (weights * mask_f) / valid_count.clamp_min(eps)
-    return -(p * p.clamp_min(eps).log()).sum()
-
-
 def softmax_with_budget(
     q: torch.Tensor,              # [B, T]
     loss_mask: torch.Tensor,      # [B, T] bool
@@ -241,6 +234,13 @@ def softmax_with_budget(
     return w
 
 
+def _shannon_entropy(weights: torch.Tensor, mask_f: torch.Tensor, valid_count: torch.Tensor,
+                     eps: float = 1e-12) -> torch.Tensor:
+    """Shannon entropy of weights normalized to a probability distribution over valid tokens."""
+    p = (weights * mask_f) / valid_count.clamp_min(eps)
+    return -(p * p.clamp_min(eps).log()).sum()
+
+
 def compute_georisk_token_weights(
     *,
     student_logits: torch.Tensor,                  # [B, T, V] (post-slice; pre-temperature)
@@ -269,6 +269,10 @@ def compute_georisk_token_weights(
     device = student_logits.device
     dtype = student_logits.dtype
     B, T = loss_mask.shape
+    assert B % 2 == 0, (
+        f"compute_georisk_token_weights expects an even batch dim with first B/2 chosen "
+        f"and second B/2 rejected (got B={B})."
+    )
 
     with torch.no_grad():
         # --- features ---

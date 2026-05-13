@@ -288,12 +288,16 @@ def test_orchestrator_returns_budget_preserving_weights():
     expected = {
         "georisk/r_mean", "georisk/m_mean", "georisk/A_mean",
         "georisk/D_mean", "georisk/I_mean", "georisk/N_mean",
-        "georisk/r_top_weighted", "georisk/A_top_weighted",
+        "georisk/r_top_weighted", "georisk/m_top_weighted",
+        "georisk/A_top_weighted", "georisk/D_top_weighted",
+        "georisk/I_top_weighted", "georisk/N_top_weighted",
         "georisk/token_weight_entropy", "georisk/effective_tokens",
         "georisk/top10_weight_mass", "georisk/weight_chosen_mean",
         "georisk/weight_rejected_mean", "georisk/nonfinite_count",
     }
-    assert expected.issubset(stats.keys()), f"missing: {expected - stats.keys()}"
+    assert set(stats.keys()) == expected, (
+        f"unexpected stats keys; missing={expected - stats.keys()} extra={stats.keys() - expected}"
+    )
 
 
 def test_orchestrator_lambda_alignment_zero_short_circuits():
@@ -317,14 +321,27 @@ def test_orchestrator_lambda_alignment_zero_short_circuits():
     assert call_count["n"] == 0, "lambda_alignment=0 must short-circuit the alignment computation"
 
 
-def test_orchestrator_stopgrad_returns_detached_weights():
-    cfg = GeoRiskConfig(top_k=4, stopgrad=True)
+def test_orchestrator_weights_never_track_grad():
+    """All feature computation runs under torch.no_grad(), so weights are always
+    detached from the autograd graph. The `stopgrad` config flag is therefore a
+    no-op in v1; this test pins that behavior explicitly so a future refactor that
+    moves work outside no_grad must update the flag semantics."""
     batch = _make_dummy_batch()
-    # Make student logits require grad so naive code would propagate.
     batch["student_logits"].requires_grad_(True)
     batch["distribution_logps"] = batch["student_logits"].log_softmax(-1)
-    w, _ = compute_georisk_token_weights(config=cfg, **batch)
-    assert not w.requires_grad
+
+    cfg_on = GeoRiskConfig(top_k=4, stopgrad=True)
+    cfg_off = GeoRiskConfig(top_k=4, stopgrad=False)
+
+    w_on, _ = compute_georisk_token_weights(config=cfg_on, **batch)
+    w_off, _ = compute_georisk_token_weights(config=cfg_off, **batch)
+
+    assert not w_on.requires_grad, "stopgrad=True must return detached weights"
+    assert not w_off.requires_grad, (
+        "stopgrad=False also returns detached weights in v1 because all feature "
+        "computation runs under torch.no_grad(); update this test if the no_grad "
+        "scope is ever narrowed."
+    )
 
 
 def test_orchestrator_all_masked_row_produces_no_nans():
