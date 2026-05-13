@@ -159,3 +159,29 @@ def test_alignment_is_finite_and_bounded():
     )
     assert torch.isfinite(A).all()
     assert (A.abs() <= 1.0 + 1e-5).all()
+
+
+from utils.georisk_features import compute_relevance_salience, compute_instability_proxy
+
+
+def test_relevance_is_abs_of_logps_margin_and_detached():
+    margin = torch.tensor([[-1.5, 0.0, 2.0]], requires_grad=True)
+    m = compute_relevance_salience(margin)
+    assert torch.allclose(m, torch.tensor([[1.5, 0.0, 2.0]]))
+    assert not m.requires_grad
+
+
+def test_instability_is_abs_deviation_of_neg_logp():
+    # per_token_logps = log p; NLL = -log p; deviation from masked mean.
+    per_token_logps = torch.tensor([[-1.0, -2.0, -3.0, -999.0]])
+    mask = torch.tensor([[True, True, True, False]])
+    # N_t = [1, 2, 3, 999]; masked mean over first three = 2; |N - 2| = [1, 0, 1, ?]
+    I = compute_instability_proxy(per_token_logps, mask)
+    assert torch.allclose(I[0, :3], torch.tensor([1.0, 0.0, 1.0]), atol=1e-6)
+
+
+def test_instability_handles_all_masked_row_without_nan():
+    per_token_logps = torch.tensor([[-1.0, -2.0]])
+    mask = torch.tensor([[False, False]])
+    I = compute_instability_proxy(per_token_logps, mask)
+    assert torch.isfinite(I).all()

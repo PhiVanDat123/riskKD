@@ -125,3 +125,21 @@ def compute_branch_local_alignment(
     pref_dir = branch_sign.unsqueeze(-1) * (onehot_k - p_stu_k)
     cos = torch.nn.functional.cosine_similarity(trust_dir, pref_dir, dim=-1, eps=eps)
     return cos.clamp(-1.0, 1.0)
+
+
+def compute_relevance_salience(logps_margin: torch.Tensor) -> torch.Tensor:
+    """m_t = |logps_margin|. v1 proxy for preference relevance (per-branch, observed-token).
+
+    See spec §7.3. A real teacher-value change ψ is deferred to v2.
+    """
+    return logps_margin.detach().abs()
+
+
+def compute_instability_proxy(per_token_logps: torch.Tensor, loss_mask: torch.Tensor) -> torch.Tensor:
+    """I_t = |N_t - masked_mean(N_t)| where N_t = -per_token_logps.
+
+    Batch/sequence-relative outlier-loss proxy, NOT true sharpness. See spec §7.5;
+    do not call this 'sharpness' in logs or paper claims.
+    """
+    N = -per_token_logps.detach()
+    return (N - masked_mean(N, loss_mask, dim=-1, keepdim=True)).abs()
