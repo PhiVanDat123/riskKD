@@ -63,6 +63,7 @@ from alignment import (
 from alignment.data import maybe_insert_system_message, is_openai_format
 from utils.compress_logits import load_input_and_target_probs_fast, load_input_and_target_probs_soft_kl,load_input_and_target_probs_filtered_soft_kl
 from utils.compress_logits import soft_margin_ce_loss
+from utils.georisk_features import GeoRiskConfig, compute_georisk_token_weights
 
 logger = logging.getLogger(__name__)
 
@@ -570,7 +571,9 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
                            average_log_prob: bool = False,
                            token_weight_mode: str = "none", token_weight_alpha: float = 0.0,
                            token_weight_normalize: bool = False,
-                           token_weight_target: str = "all"):
+                           token_weight_target: str = "all",
+                           branch_sign: torch.Tensor = None,
+                           georisk_config: GeoRiskConfig = None):
     """Compute logps margin, KL divergence, and CVaR risk ratio for Ra-DPO."""
     assert logits.shape[:-1] == labels.shape
     assert reference_logits.shape[:-1] == labels.shape
@@ -604,11 +607,45 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
 
     logps_margin = per_token_logps - per_reference_token_logps
 
+    georisk_stats: dict = {}
+    if token_weight_mode == "georisk" and weights is not None:
+        raise ValueError(
+            "radpo_token_weight_mode='georisk' is mutually exclusive with an explicit "
+            "per-token `weights` tensor. Either disable WPO weighting (set use_weighting=False / "
+            "remove chosen_weight/rejected_weight from the batch) or use mode='kl_inv'/'none'."
+        )
+
     if weights is None:
         if token_weight_mode == "kl_inv" and token_weight_alpha > 0:
             # Downweight tokens where policy & reference disagree wildly (the cross-size noise).
             # per_position_kl is already [B, T-1] (computed on the sliced labels above).
             weights = torch.exp(-token_weight_alpha * per_position_kl.detach())
+        elif token_weight_mode == "georisk":
+            if georisk_config is None:
+                raise ValueError("radpo_token_weight_mode='georisk' requires a GeoRiskConfig "
+                                 "passed via `georisk_config=`; build it in radpo_concatenated_forward "
+                                 "with GeoRiskConfig.from_args(self.args).")
+            if branch_sign is None:
+                raise ValueError("radpo_token_weight_mode='georisk' requires `branch_sign` "
+                                 "(+1 for chosen rows, -1 for rejected) passed from "
+                                 "radpo_concatenated_forward.")
+            # branch_sign comes in unsliced from the caller; slice consistently with labels.
+            branch_sign_sliced = branch_sign[:, 1:]
+            weights, georisk_stats = compute_georisk_token_weights(
+                student_logits=logits,
+                reference_logits=reference_logits,
+                distribution_logps=distribution_logps,
+                reference_distribution_logps=reference_distribution_logps,
+                labels=labels,
+                loss_mask=loss_mask,
+                branch_sign=branch_sign_sliced,
+                per_position_kl=per_position_kl,
+                per_position_risk_ratio=per_position_risk_ratio,
+                per_token_logps=per_token_logps,
+                per_reference_token_logps=per_reference_token_logps,
+                logps_margin=logps_margin,
+                config=georisk_config,
+            )
         else:
             weights = torch.ones_like(logps_margin)
     else:
@@ -642,6 +679,7 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
             (per_token_logps * logp_weights * loss_mask).sum(-1) / denom,
             mean_token_weight,
             effective_token_count,
+            georisk_stats,
         )
     else:
         return (
@@ -652,6 +690,7 @@ def _radpo_get_batch_logps(logits: torch.FloatTensor, reference_logits: torch.Fl
             (per_token_logps * logp_weights * loss_mask).sum(-1),
             mean_token_weight,
             effective_token_count,
+            georisk_stats,
         )
 
 
