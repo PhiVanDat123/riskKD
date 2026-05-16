@@ -1,0 +1,21 @@
+{
+  "overall": 6.4367,
+  "turn1": 6.9241,
+  "turn2": 5.9494,
+  "by_category": {
+    "coding": 4.25,
+    "extraction": 4.8421,
+    "humanities": 8.05,
+    "math": 6.6,
+    "reasoning": 4.7895,
+    "roleplay": 6.925,
+    "stem": 8.05,
+    "writing": 7.825
+  },
+  "n_judged": 158,
+  "family": "qwen3-1.7b",
+  "repo_id": "vukien2301/qwen3-1.7b-riskKD",
+  "model_id": "qwen3-1.7b-riskKD",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:27:05.981052Z"
+}

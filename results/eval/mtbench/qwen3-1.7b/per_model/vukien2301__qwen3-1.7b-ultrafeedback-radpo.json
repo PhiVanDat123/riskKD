@@ -1,0 +1,21 @@
+{
+  "overall": 5.7627,
+  "turn1": 5.7438,
+  "turn2": 5.7821,
+  "by_category": {
+    "coding": 4.6,
+    "extraction": 4.9,
+    "humanities": 6.8158,
+    "math": 5.0,
+    "reasoning": 3.8,
+    "roleplay": 8.2,
+    "stem": 6.975,
+    "writing": 5.8684
+  },
+  "n_judged": 158,
+  "family": "qwen3-1.7b",
+  "repo_id": "vukien2301/qwen3-1.7b-ultrafeedback-radpo",
+  "model_id": "qwen3-1.7b-ultrafeedback-radpo",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:34:10.931555Z"
+}

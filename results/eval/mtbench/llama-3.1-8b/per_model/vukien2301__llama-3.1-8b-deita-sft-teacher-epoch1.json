@@ -1,0 +1,21 @@
+{
+  "overall": 5.825,
+  "turn1": 5.75,
+  "turn2": 5.9,
+  "by_category": {
+    "coding": 5.35,
+    "extraction": 5.4,
+    "humanities": 7.125,
+    "math": 3.6,
+    "reasoning": 3.95,
+    "roleplay": 6.825,
+    "stem": 7.4,
+    "writing": 6.95
+  },
+  "n_judged": 160,
+  "family": "llama-3.1-8b",
+  "repo_id": "vukien2301/llama-3.1-8b-deita-sft-teacher-epoch1",
+  "model_id": "llama-3.1-8b-deita-sft-teacher-epoch1",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:41:35.754167Z"
+}

@@ -1,0 +1,21 @@
+{
+  "overall": 6.5032,
+  "turn1": 6.7562,
+  "turn2": 6.2436,
+  "by_category": {
+    "coding": 5.7,
+    "extraction": 7.1579,
+    "humanities": 7.45,
+    "math": 4.6,
+    "reasoning": 5.75,
+    "roleplay": 7.475,
+    "stem": 7.4,
+    "writing": 6.5263
+  },
+  "n_judged": 158,
+  "family": "qwen3-8b",
+  "repo_id": "vukien2301/qwen3-8b-deita-sft-teacher",
+  "model_id": "qwen3-8b-deita-sft-teacher",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:39:53.796405Z"
+}

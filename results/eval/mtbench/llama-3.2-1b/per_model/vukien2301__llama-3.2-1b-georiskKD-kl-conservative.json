@@ -1,0 +1,21 @@
+{
+  "overall": 1.0,
+  "turn1": 1.0,
+  "turn2": 1.0,
+  "by_category": {
+    "coding": 1.0,
+    "extraction": 1.0,
+    "humanities": 1.0,
+    "math": 1.0,
+    "reasoning": 1.0,
+    "roleplay": 1.0,
+    "stem": 1.0,
+    "writing": 1.0
+  },
+  "n_judged": 143,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama-3.2-1b-georiskKD-kl-conservative",
+  "model_id": "llama-3.2-1b-georiskKD-kl-conservative",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:31:52.396336Z"
+}

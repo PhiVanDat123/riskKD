@@ -1,0 +1,23 @@
+# Eval raw outputs (too large for git, can be regenerated from scores.json + scripts)
+results/eval/mtbench/raw/
+results/eval/alpaca/raw/
+results/eval/*/logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.tmp
+*.tmp.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+
+# Logs (kept on box, not in git)
+logs/
+wandb/

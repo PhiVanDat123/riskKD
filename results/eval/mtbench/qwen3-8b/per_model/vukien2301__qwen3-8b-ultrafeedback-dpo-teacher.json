@@ -1,0 +1,21 @@
+{
+  "overall": 7.5818,
+  "turn1": 7.8312,
+  "turn2": 7.3291,
+  "by_category": {
+    "coding": 5.75,
+    "extraction": 8.0,
+    "humanities": 8.075,
+    "math": 6.65,
+    "reasoning": 6.65,
+    "roleplay": 8.9,
+    "stem": 8.8947,
+    "writing": 7.8
+  },
+  "n_judged": 159,
+  "family": "qwen3-8b",
+  "repo_id": "vukien2301/qwen3-8b-ultrafeedback-dpo-teacher",
+  "model_id": "qwen3-8b-ultrafeedback-dpo-teacher",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:41:25.565332Z"
+}

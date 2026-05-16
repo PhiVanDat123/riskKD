@@ -1,0 +1,21 @@
+{
+  "overall": 1.717,
+  "turn1": 1.7625,
+  "turn2": 1.6709,
+  "by_category": {
+    "coding": 1.25,
+    "extraction": 1.3,
+    "humanities": 2.4737,
+    "math": 1.1,
+    "reasoning": 1.05,
+    "roleplay": 2.0,
+    "stem": 1.95,
+    "writing": 2.65
+  },
+  "n_judged": 159,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama-3.2-1b-adpa-ultrafeedback",
+  "model_id": "llama-3.2-1b-adpa-ultrafeedback",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:38:39.431264Z"
+}

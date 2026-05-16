@@ -1,0 +1,21 @@
+{
+  "overall": 7.044,
+  "turn1": 7.7125,
+  "turn2": 6.3671,
+  "by_category": {
+    "coding": 5.7,
+    "extraction": 7.225,
+    "humanities": 8.625,
+    "math": 4.75,
+    "reasoning": 5.65,
+    "roleplay": 8.875,
+    "stem": 7.875,
+    "writing": 7.6842
+  },
+  "n_judged": 159,
+  "family": "llama-3.1-8b",
+  "repo_id": "vukien2301/llama-3.1-8b-ultrafeedback-dpo-from-epoch1",
+  "model_id": "llama-3.1-8b-ultrafeedback-dpo-from-epoch1",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:43:09.490923Z"
+}

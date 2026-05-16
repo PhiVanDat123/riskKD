@@ -1,0 +1,21 @@
+{
+  "overall": 5.4313,
+  "turn1": 5.775,
+  "turn2": 5.0875,
+  "by_category": {
+    "coding": 4.5,
+    "extraction": 4.75,
+    "humanities": 6.425,
+    "math": 5.3,
+    "reasoning": 4.2,
+    "roleplay": 6.525,
+    "stem": 6.675,
+    "writing": 5.075
+  },
+  "n_judged": 160,
+  "family": "qwen3-1.7b",
+  "repo_id": "vukien2301/qwen3-1.7b-deita-sft-student",
+  "model_id": "qwen3-1.7b-deita-sft-student",
+  "judge_model": "gpt-4",
+  "completed_at": "2026-05-16T03:44:25.565974Z"
+}
