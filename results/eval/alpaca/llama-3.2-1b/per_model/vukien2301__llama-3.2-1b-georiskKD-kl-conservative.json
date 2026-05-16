@@ -1,0 +1,15 @@
+{
+  "win_rate": 0.0,
+  "lc_win_rate": 0.0001,
+  "standard_error": 0.0,
+  "avg_length": 7204.0,
+  "n_total": 805,
+  "n_wins": 0,
+  "n_draws": 0,
+  "n_losses": null,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama-3.2-1b-georiskKD-kl-conservative",
+  "model_id": "llama-3.2-1b-georiskKD-kl-conservative",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:21:48.026406Z"
+}

@@ -1,0 +1,15 @@
+{
+  "win_rate": 37.7837,
+  "lc_win_rate": 27.8705,
+  "standard_error": 1.5728,
+  "avg_length": 4997.0,
+  "n_total": 805,
+  "n_wins": 299,
+  "n_draws": 6,
+  "n_losses": null,
+  "family": "qwen3-1.7b",
+  "repo_id": "vukien2301/qwen3-1.7b-ultrafeedback-adpa",
+  "model_id": "qwen3-1.7b-ultrafeedback-adpa",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:26:19.156700Z"
+}

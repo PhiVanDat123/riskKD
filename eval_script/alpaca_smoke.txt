@@ -1,0 +1,2 @@
+# Smoke test: single small model, 5 prompts only (SMOKE=1)
+vukien2301/qwen3-1.7b-deita-sft-student

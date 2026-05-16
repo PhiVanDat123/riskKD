@@ -1,0 +1,15 @@
+{
+  "win_rate": 34.171,
+  "lc_win_rate": 24.2406,
+  "standard_error": 1.4831,
+  "avg_length": 7690.0,
+  "n_total": 805,
+  "n_wins": 262,
+  "n_draws": 14,
+  "n_losses": null,
+  "family": "qwen3-1.7b",
+  "repo_id": "vukien2301/qwen3-1.7b-riskKD",
+  "model_id": "qwen3-1.7b-riskKD",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:14:56.426154Z"
+}

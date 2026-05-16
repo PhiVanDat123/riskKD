@@ -1,0 +1,15 @@
+{
+  "win_rate": 34.1805,
+  "lc_win_rate": 24.9925,
+  "standard_error": 1.4667,
+  "avg_length": 8110.0,
+  "n_total": 805,
+  "n_wins": 264,
+  "n_draws": 8,
+  "n_losses": null,
+  "family": "qwen3-8b",
+  "repo_id": "vukien2301/qwen3-8b-ultrafeedback-dpo-teacher",
+  "model_id": "qwen3-8b-ultrafeedback-dpo-teacher",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:34:12.602431Z"
+}

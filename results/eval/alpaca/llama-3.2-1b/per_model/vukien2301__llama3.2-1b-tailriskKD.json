@@ -1,0 +1,15 @@
+{
+  "win_rate": 14.0365,
+  "lc_win_rate": 3.2734,
+  "standard_error": 1.0854,
+  "avg_length": 9170.0,
+  "n_total": 805,
+  "n_wins": 102,
+  "n_draws": 4,
+  "n_losses": null,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama3.2-1b-tailriskKD",
+  "model_id": "llama3.2-1b-tailriskKD",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:16:45.770444Z"
+}

@@ -1,0 +1,15 @@
+{
+  "win_rate": 11.5558,
+  "lc_win_rate": 2.563,
+  "standard_error": 1.0091,
+  "avg_length": 9075.0,
+  "n_total": 805,
+  "n_wins": 87,
+  "n_draws": 3,
+  "n_losses": null,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama3.2-1b-pfw-tail",
+  "model_id": "llama3.2-1b-pfw-tail",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:18:23.433343Z"
+}

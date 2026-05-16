@@ -1,0 +1,15 @@
+{
+  "win_rate": 4.325,
+  "lc_win_rate": 0.9302,
+  "standard_error": 0.6662,
+  "avg_length": 8968.0,
+  "n_total": 805,
+  "n_wins": 33,
+  "n_draws": 1,
+  "n_losses": null,
+  "family": "qwen3-1.7b",
+  "repo_id": "vukien2301/qwen3-1.7b-deita-sft-student",
+  "model_id": "qwen3-1.7b-deita-sft-student",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:29:15.305446Z"
+}

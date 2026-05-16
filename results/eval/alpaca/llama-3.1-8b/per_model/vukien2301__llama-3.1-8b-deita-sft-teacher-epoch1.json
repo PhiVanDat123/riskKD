@@ -1,0 +1,15 @@
+{
+  "win_rate": 3.5205,
+  "lc_win_rate": 0.6639,
+  "standard_error": 0.5937,
+  "avg_length": 8974.0,
+  "n_total": 805,
+  "n_wins": 25,
+  "n_draws": 2,
+  "n_losses": null,
+  "family": "llama-3.1-8b",
+  "repo_id": "vukien2301/llama-3.1-8b-deita-sft-teacher-epoch1",
+  "model_id": "llama-3.1-8b-deita-sft-teacher-epoch1",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:34:31.856454Z"
+}

@@ -1,0 +1,15 @@
+{
+  "win_rate": 0.0,
+  "lc_win_rate": 0.0001,
+  "standard_error": 0.0,
+  "avg_length": 6318.0,
+  "n_total": 805,
+  "n_wins": 0,
+  "n_draws": 0,
+  "n_losses": null,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama-3.2-1b-georiskKD-align-heavy",
+  "model_id": "llama-3.2-1b-georiskKD-align-heavy",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:21:38.645437Z"
+}

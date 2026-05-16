@@ -1,0 +1,15 @@
+{
+  "win_rate": 4.4516,
+  "lc_win_rate": 3.2415,
+  "standard_error": 0.6913,
+  "avg_length": 3221.0,
+  "n_total": 805,
+  "n_wins": 32,
+  "n_draws": 1,
+  "n_losses": null,
+  "family": "llama-3.2-1b",
+  "repo_id": "vukien2301/llama-3.2-1b-dckd-ultrafeedback",
+  "model_id": "llama-3.2-1b-dckd-ultrafeedback",
+  "annotator": "weighted_alpaca_eval_gpt-4o-mini-2024-07-18",
+  "completed_at": "2026-05-16T04:29:39.427928Z"
+}

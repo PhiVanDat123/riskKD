@@ -1,0 +1,37 @@
+# AlpacaEval 2 LC sweep: 25 models, ours-first ordering.
+# Same list as eval_script/mtbench_model_list.txt.
+
+# Tier 1 — Ours (riskKD family), Qwen + Llama interleaved
+vukien2301/qwen3-1.7b-riskKD
+vukien2301/llama-3.2-1b-riskkd-tokenwt-epoch1
+vukien2301/qwen3-1.7b-tailriskKD
+vukien2301/llama3.2-1b-tailriskKD
+vukien2301/qwen3-1.7b-pfw-tail
+vukien2301/llama3.2-1b-pfw-tail
+
+# Tier 1b — GeoRiskKD (Llama only, 4 variants)
+vukien2301/llama-3.2-1b-georiskKD-risk
+vukien2301/llama-3.2-1b-georiskKD-all
+vukien2301/llama-3.2-1b-georiskKD-align-heavy
+vukien2301/llama-3.2-1b-georiskKD-kl-conservative
+
+# Tier 2 — Qwen baselines
+vukien2301/qwen3-1.7b-ultrafeedback-dpo
+vukien2301/qwen3-1.7b-ultrafeedback-wpo
+vukien2301/qwen3-1.7b-ultrafeedback-radpo
+vukien2301/qwen3-1.7b-ultrafeedback-dckd
+vukien2301/qwen3-1.7b-ultrafeedback-adpa
+vukien2301/qwen3-1.7b-ultrafeedback-tvkd
+
+# Tier 3 — SFT floors + Llama baselines
+vukien2301/qwen3-1.7b-deita-sft-student
+vukien2301/llama-3.2-1b-deita-sft-student
+vukien2301/llama-3.2-1b-dckd-ultrafeedback
+vukien2301/llama-3.2-1b-adpa-ultrafeedback
+vukien2301/llama-3.2-1b-tvkd-ultrafeedback
+
+# Tier 4 — Teachers (8B; slower per-model, still TP=1 on B200)
+vukien2301/qwen3-8b-deita-sft-teacher
+vukien2301/qwen3-8b-ultrafeedback-dpo-teacher
+vukien2301/llama-3.1-8b-deita-sft-teacher-epoch1
+vukien2301/llama-3.1-8b-ultrafeedback-dpo-from-epoch1
