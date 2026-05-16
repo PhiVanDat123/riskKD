@@ -1,6 +1,10 @@
-# Eval raw outputs (too large for git, can be regenerated from scores.json + scripts)
-results/eval/mtbench/raw/
-results/eval/alpaca/raw/
+# Eval raw outputs (too large for git, can be regenerated from scores.json + scripts).
+# Only exclude the heavy subdirs; keep small reproducibility files (question.jsonl etc.).
+results/eval/mtbench/raw/model_answer/
+results/eval/mtbench/raw/model_judgment/
+results/eval/alpaca/raw/eval_results/
+results/eval/alpaca/raw/model_outputs/
+results/eval/*/raw/logs/
 results/eval/*/logs/
 
 # Python
