@@ -30,12 +30,16 @@ QUESTION_FILE=/workspace/FastChat/fastchat/llm_judge/data/mt_bench/question.json
 OUT_ROOT=results/eval/mtbench-pair-v2
 
 JUDGES=(
-  "claude-sonnet-4-6"
   "gpt-5.4-mini"
 )
+# To re-include Sonnet 4.6, prepend "claude-sonnet-4-6" - costs ~10x more per pair.
 
-# anchor:baseline pairs (model_id of answer JSONL filename)
-ANCHOR_QWEN="qwen3-1.7b-tailriskKD"
+# All 3 Ours methods as anchors x baselines x judges. Resume skips done pairs.
+ANCHORS_QWEN=(
+  "qwen3-1.7b-tailriskKD"
+  "qwen3-1.7b-pfw-tail"
+  "qwen3-1.7b-riskKD"
+)
 QWEN_BASELINES=(
   "qwen3-1.7b-ultrafeedback-dpo"
   "qwen3-1.7b-ultrafeedback-wpo"
@@ -44,7 +48,11 @@ QWEN_BASELINES=(
   "qwen3-1.7b-ultrafeedback-adpa"
   "qwen3-1.7b-ultrafeedback-tvkd"
 )
-ANCHOR_LLAMA="llama3.2-1b-tailriskKD"
+ANCHORS_LLAMA=(
+  "llama3.2-1b-tailriskKD"
+  "llama3.2-1b-pfw-tail"
+  "llama-3.2-1b-riskkd-tokenwt-epoch1"
+)
 LLAMA_BASELINES=(
   "llama-3.2-1b-dckd-ultrafeedback"
   "llama-3.2-1b-adpa-ultrafeedback"
@@ -75,19 +83,24 @@ run_one() {
   log "done: anchor=$anchor baseline=$baseline judge=$judge rc=$rc"
 }
 
-# Iterate: (anchor, baseline, judge) tuples
+# Iterate: (anchor, baseline, judge) tuples for all anchors
 TOTAL=0
 START=$(date +%s)
 for judge in "${JUDGES[@]}"; do
-  for baseline in "${QWEN_BASELINES[@]}"; do
-    run_one "$ANCHOR_QWEN" "$baseline" "$judge"
-    TOTAL=$((TOTAL+1))
-    [ "$SMOKE" = "1" ] && break  # smoke: just one pair per judge
+  for anchor in "${ANCHORS_QWEN[@]}"; do
+    for baseline in "${QWEN_BASELINES[@]}"; do
+      run_one "$anchor" "$baseline" "$judge"
+      TOTAL=$((TOTAL+1))
+      [ "$SMOKE" = "1" ] && break  # smoke: one pair only
+    done
+    [ "$SMOKE" = "1" ] && break
   done
   [ "$SMOKE" = "1" ] && continue
-  for baseline in "${LLAMA_BASELINES[@]}"; do
-    run_one "$ANCHOR_LLAMA" "$baseline" "$judge"
-    TOTAL=$((TOTAL+1))
+  for anchor in "${ANCHORS_LLAMA[@]}"; do
+    for baseline in "${LLAMA_BASELINES[@]}"; do
+      run_one "$anchor" "$baseline" "$judge"
+      TOTAL=$((TOTAL+1))
+    done
   done
 done
 DURATION=$(($(date +%s) - START))
