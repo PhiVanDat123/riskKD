@@ -1,0 +1,20 @@
+{
+  "radpo_pfw/trust_mean": 0.7448935508728027,
+  "radpo_pfw/frontier_mean": 0.5548916459083557,
+  "radpo_pfw/error_gate_mean": 1.2394829988479614,
+  "radpo_pfw/q_low_mean": 0.014702200889587402,
+  "radpo_pfw/q_high_mean": 0.7324000597000122,
+  "radpo_pfw/raw_weight_mean": 0.5498124361038208,
+  "radpo_pfw/delta_clipped_frac": 0.01834862306714058,
+  "num_examples": 24,
+  "tail_risk_min": 28.999610900878906,
+  "tail_risk_p50": 124.20970153808594,
+  "tail_risk_p90": 215.35360717773438,
+  "tail_risk_max": 227.21646118164062,
+  "pfw_weight_p10": 0.012035607360303402,
+  "pfw_weight_p50": 1.112111210823059,
+  "pfw_weight_p90": 1.5105576515197754,
+  "pfw_weight_gini_proxy": 0.2650102376937866,
+  "kl_inv_weight_p90": 1.3684824705123901,
+  "uniform_weight_p90": 1.0
+}
